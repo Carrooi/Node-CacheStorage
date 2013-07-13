@@ -42,6 +42,15 @@ class Storage
 		return result
 
 
+	findKeysByPriority: (priority) ->
+		metas = @getMeta()
+		result = []
+		for key, meta of metas
+			if typeof meta[Cache.PRIORITY] != 'undefined' && meta[Cache.PRIORITY] <= priority
+				result.push(key)
+		return result
+
+
 	verify: (meta) ->
 		typefn = Object.prototype.toString
 

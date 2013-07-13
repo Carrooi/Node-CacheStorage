@@ -63,7 +63,8 @@ cache.save('some_data', 'some value of some_data', {
 	files: ['./images.txt', './info.txt'],		// expiration by files
 	tags: ['image', 'article'],					// tags for manual expiration
 	expire: '2015-12-24 18:00',					// expire data in given date (other examples below)
-	items: ['some_other_data']					// expire if other data in cache expires
+	items: ['some_other_data'],					// expire if other data in cache expires
+	priority: 50								// example below
 });
 ```
 
@@ -98,6 +99,16 @@ Now some_data will expire tomorow. You can see full documentation in moment.js [
 
 Every cache item can also depend on other cached items. If some of these other items is invalidated, then also this main
 is invalidated.
+
+### Expiration by priority
+
+```
+cache.clean({
+	priority: 100
+});
+```
+
+All items with priority 100 or below will expire.
 
 ## Removing all in namespace
 

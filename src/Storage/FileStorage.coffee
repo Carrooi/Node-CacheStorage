@@ -80,12 +80,18 @@ class FileStorage extends Storage
 	clean: (conditions) ->
 		typeFn = Object.prototype.toString
 		type = typeFn.call(conditions)
-		if type == '[object String]' && conditions == Cache.ALL
+		if conditions == Cache.ALL
 			@writeData({}, {})
-		else if type == '[object Object]' && typeof conditions[Cache.TAGS] != 'undefined'
-			if typeFn(conditions[Cache.TAGS]) == '[object String]' then conditions[Cache.TAGS] = [conditions[Cache.TAGS]]
-			for tag in conditions[Cache.TAGS]
-				for key in @findKeysByTag(tag)
+
+		else if type == '[object Object]'
+			if typeof conditions[Cache.TAGS] != 'undefined'
+				if typeFn(conditions[Cache.TAGS]) == '[object String]' then conditions[Cache.TAGS] = [conditions[Cache.TAGS]]
+				for tag in conditions[Cache.TAGS]
+					for key in @findKeysByTag(tag)
+						@remove(key)
+
+			if typeof conditions[Cache.PRIORITY] != 'undefined'
+				for key in @findKeysByPriority(conditions[Cache.PRIORITY])
 					@remove(key)
 
 		return @

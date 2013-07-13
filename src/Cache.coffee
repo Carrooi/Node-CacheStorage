@@ -14,10 +14,11 @@ class Cache
 
 	@ITEMS = 'items'
 
+	@PRIORITY = 'priority'
+
 	@ALL = 'all'
 
 	@TIME_FORMAT = 'YYYY-MM-DD HH:mm'
-
 
 	storage: null
 
@@ -55,6 +56,8 @@ class Cache
 				result[Cache.ITEMS] = []
 				for item, i in dependencies[Cache.ITEMS]
 					result[Cache.ITEMS].push(@generateKey(item))
+
+			if typeof dependencies[Cache.PRIORITY] != 'undefined' then result[Cache.PRIORITY] = dependencies[Cache.PRIORITY]
 
 			if typeof dependencies[Cache.TAGS] != 'undefined' then result[Cache.TAGS] = dependencies[Cache.TAGS]
 
