@@ -56,6 +56,8 @@ class Cache
 				for item, i in dependencies[Cache.ITEMS]
 					result[Cache.ITEMS].push(@generateKey(item))
 
+			if typeof dependencies[Cache.TAGS] != 'undefined' then result[Cache.TAGS] = dependencies[Cache.TAGS]
+
 		return result
 
 
