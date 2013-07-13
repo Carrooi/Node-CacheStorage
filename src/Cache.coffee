@@ -12,6 +12,8 @@ class Cache
 
 	@EXPIRE = 'expire'
 
+	@ITEMS = 'items'
+
 	@ALL = 'all'
 
 	@TIME_FORMAT = 'YYYY-MM-DD HH:mm'
@@ -48,6 +50,11 @@ class Cache
 					when '[object Object]' then time = moment().add(dependencies[Cache.EXPIRE])
 					else throw new Error 'Expire format is not valid'
 				result[Cache.EXPIRE] = time.valueOf()
+
+			if typeof dependencies[Cache.ITEMS] != 'undefined'
+				result[Cache.ITEMS] = []
+				for item, i in dependencies[Cache.ITEMS]
+					result[Cache.ITEMS].push(@generateKey(item))
 
 		return result
 

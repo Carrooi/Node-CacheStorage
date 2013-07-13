@@ -29,7 +29,8 @@ class Storage
 
 
 	findMeta: (key) ->
-		return @getMeta()[key]
+		meta = @getMeta()
+		return if typeof meta[key] != 'undefined' then meta[key] else null
 
 
 	findKeysByTag: (tag) ->
@@ -48,8 +49,14 @@ class Storage
 			if typeof meta[Cache.FILES] != 'undefined'
 				for file, time of meta[Cache.FILES]
 					if (new Date(fs.statSync(file).mtime)).getTime() != time then return false
+
 			if typeof meta[Cache.EXPIRE] != 'undefined'
 				if moment().valueOf() >= meta[Cache.EXPIRE] then return false
+
+			if typeof meta[Cache.ITEMS] != 'undefined'
+				for item in meta[Cache.ITEMS]
+					item = @findMeta(item)
+					if (item == null) || (item != null && @verify(item) == false) then return false
 
 		return true
 
