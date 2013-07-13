@@ -32,6 +32,7 @@ class Cache
 
 	parseDependencies: (dependencies) ->
 		typefn = Object.prototype.toString
+		result = {}
 
 		if typefn.call(dependencies) == '[object Object]'
 			if typeof dependencies[Cache.FILES] != 'undefined'
@@ -39,15 +40,16 @@ class Cache
 				for file in dependencies[Cache.FILES]
 					file = path.resolve(file)
 					files[file] = (new Date(fs.statSync(file).mtime)).getTime()
-				dependencies[Cache.FILES] = files
+				result[Cache.FILES] = files
+
 			if typeof dependencies[Cache.EXPIRE] != 'undefined'
 				switch typefn.call(dependencies[Cache.EXPIRE])
 					when '[object String]' then time = moment(dependencies[Cache.EXPIRE], Cache.TIME_FORMAT)
 					when '[object Object]' then time = moment().add(dependencies[Cache.EXPIRE])
 					else throw new Error 'Expire format is not valid'
-				dependencies[Cache.EXPIRE] = time.valueOf()
+				result[Cache.EXPIRE] = time.valueOf()
 
-		return dependencies
+		return result
 
 
 	load: (key, fallback = null) ->
