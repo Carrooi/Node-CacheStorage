@@ -20,6 +20,6 @@
 	},
 	"main": "./lib/Cache.js",
 	"dependencies": {
-		"q": "0.9.6"
+		"moment": "2.1.0"
 	}
 }
