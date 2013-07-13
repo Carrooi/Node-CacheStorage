@@ -98,3 +98,9 @@ Now some_data will expire tomorow. You can see full documentation in moment.js [
 
 Every cache item can also depend on other cached items. If some of these other items is invalidated, then also this main
 is invalidated.
+
+## Removing all in namespace
+
+```
+cache.clean(Cache.ALL);		// or cache.clean('all');
+```
