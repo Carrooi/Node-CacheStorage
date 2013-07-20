@@ -1,6 +1,10 @@
-fs = require 'fs'
+isWindow = if typeof window == 'undefined' then false else true
+
+if !isWindow
+	fs = require 'fs'
+	path = require 'path'
+
 moment = require 'moment'
-path = require 'path'
 Cache = require '../Cache'
 
 class Storage
@@ -57,6 +61,8 @@ class Storage
 
 		if typefn.call(meta) == '[object Object]'
 			if typeof meta[Cache.FILES] != 'undefined'
+				if isWindow then throw new Error 'Files meta information is not supported in browser'
+
 				for file, time of meta[Cache.FILES]
 					if (new Date(fs.statSync(file).mtime)).getTime() != time then return false
 
@@ -77,6 +83,8 @@ class Storage
 
 		if typefn.call(dependencies) == '[object Object]'
 			if typeof dependencies[Cache.FILES] != 'undefined'
+				if isWindow then throw new Error 'Files meta information is not supported in browser'
+
 				files = {}
 				for file in dependencies[Cache.FILES]
 					file = path.resolve(file)
