@@ -1,5 +1,3 @@
-crypto = require 'crypto-browserify'
-
 class Cache
 
 
@@ -27,7 +25,15 @@ class Cache
 
 
 	generateKey: (key) ->
-		return crypto.createHash('sha1').update(key).digest('hex')
+		hash = 0
+		if key.length == 0 then return hash
+		max = key.length - 1
+		for i in [0..max]
+			char = key.charCodeAt(i)
+			hash = ((hash << 5) - hash) + char
+			hash |= 0
+
+		return hash
 
 
 	load: (key, fallback = null) ->
