@@ -1,5 +1,6 @@
 fs = require 'fs'
 moment = require 'moment'
+path = require 'path'
 Cache = require '../Cache'
 
 class Storage
@@ -68,6 +69,37 @@ class Storage
 					if (item == null) || (item != null && @verify(item) == false) then return false
 
 		return true
+
+
+	parseDependencies: (dependencies) ->
+		typefn = Object.prototype.toString
+		result = {}
+
+		if typefn.call(dependencies) == '[object Object]'
+			if typeof dependencies[Cache.FILES] != 'undefined'
+				files = {}
+				for file in dependencies[Cache.FILES]
+					file = path.resolve(file)
+					files[file] = (new Date(fs.statSync(file).mtime)).getTime()
+				result[Cache.FILES] = files
+
+			if typeof dependencies[Cache.EXPIRE] != 'undefined'
+				switch typefn.call(dependencies[Cache.EXPIRE])
+					when '[object String]' then time = moment(dependencies[Cache.EXPIRE], Cache.TIME_FORMAT)
+					when '[object Object]' then time = moment().add(dependencies[Cache.EXPIRE])
+					else throw new Error 'Expire format is not valid'
+				result[Cache.EXPIRE] = time.valueOf()
+
+			if typeof dependencies[Cache.ITEMS] != 'undefined'
+				result[Cache.ITEMS] = []
+				for item, i in dependencies[Cache.ITEMS]
+					result[Cache.ITEMS].push(@generateKey(item))
+
+			if typeof dependencies[Cache.PRIORITY] != 'undefined' then result[Cache.PRIORITY] = dependencies[Cache.PRIORITY]
+
+			if typeof dependencies[Cache.TAGS] != 'undefined' then result[Cache.TAGS] = dependencies[Cache.TAGS]
+
+		return result
 
 
 module.exports = Storage
