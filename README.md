@@ -16,8 +16,13 @@ var FileStorage = require('cache-storage/Storage/FileStorage');
 var cache = new Cache(new FileStorage('./temp'), 'namespace');
 ```
 
-You have to set storage which you want to use (now there is only file storage, but other storages like memcache and other
-are in plan) and name of namespace for cache, because you can use more than one independent caches.
+You have to set storage which you want to use (their list below) and name of namespace for cache, because you can use
+more than one independent caches.
+
+## Available storages
+
+* FileStorage (cache-storage/Storage/FileStorage - saving data to json files)
+* BrowserLocalStorage (cache-storage/Storage/BrowserLocalStorage - saving data to HTML5 local storage)
 
 ## Loading & saving
 

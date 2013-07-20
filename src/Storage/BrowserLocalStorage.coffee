@@ -1,7 +1,7 @@
 Storage = require './Storage'
 Cache = require '../Cache'
 
-class BrowserLocalStorage
+class BrowserLocalStorage extends Storage
 
 
 	@TEST_VALUE = '__--cache-storage--__'
