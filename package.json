@@ -1,7 +1,7 @@
 {
 	"name": "cache-storage",
 	"description": "Cache storage for node js",
-	"version": "1.1.1",
+	"version": "1.1.2",
 	"author": {
 		"name": "David Kudera",
 		"email": "sakren@gmail.com"
@@ -15,6 +15,7 @@
 		"type": "git",
 		"url": "git@github.com:sakren/node-cache-storage.git"
 	},
+	"license": "MIT",
 	"engines": {
 		"node": "*"
 	},
