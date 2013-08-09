@@ -12,6 +12,10 @@ class Storage
 
 	cache: null
 
+	data: null
+
+	meta: null
+
 
 	read: (key) ->
 		throw new Error 'Cache storage: read method is not implemented.'
@@ -31,6 +35,11 @@ class Storage
 
 	getMeta: ->
 		throw new Error 'Cache storage: getMeta method is not implemented'
+
+
+	invalidate: ->
+		@data = null
+		@meta = null
 
 
 	findMeta: (key) ->
@@ -101,7 +110,7 @@ class Storage
 			if typeof dependencies[Cache.ITEMS] != 'undefined'
 				result[Cache.ITEMS] = []
 				for item, i in dependencies[Cache.ITEMS]
-					result[Cache.ITEMS].push(@generateKey(item))
+					result[Cache.ITEMS].push(@cache.generateKey(item))
 
 			if typeof dependencies[Cache.PRIORITY] != 'undefined' then result[Cache.PRIORITY] = dependencies[Cache.PRIORITY]
 

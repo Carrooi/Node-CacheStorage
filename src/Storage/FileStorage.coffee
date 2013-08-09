@@ -7,10 +7,6 @@ class FileStorage extends Storage
 
 	directory: null
 
-	data: null
-
-	meta: null
-
 
 	constructor: (@directory) ->
 

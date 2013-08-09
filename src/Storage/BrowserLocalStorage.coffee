@@ -7,11 +7,6 @@ class BrowserLocalStorage extends Storage
 	@TEST_VALUE = '__--cache-storage--__'
 
 
-	data: null
-
-	meta: null
-
-
 	constructor: ->
 		if !BrowserLocalStorage.isSupported()
 			throw new Error 'Cache storage: Local storage is not supported'

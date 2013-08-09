@@ -1,6 +1,10 @@
 # cache-storage
 Cache storage inspired by cache in [Nette framework](http://doc.nette.org/en/caching).
 
+## Changelog
+
+Changelog is in the bottom of this readme.
+
 ## Installing
 
 ```
@@ -120,3 +124,30 @@ All items with priority 100 or below will expire.
 ```
 cache.clean(Cache.ALL);		// or cache.clean('all');
 ```
+
+## Changelog
+
++ 1.2.0
+	+ Bugs in dependencies parser
+	+ Written some mocha tests
+	+ Added changelog
+
++ 1.1.2
+	+ Added MIT license
+
+* 1.1.1
+	+ Renamed repository (cache-storage => node-cache-storage)
+
+* 1.1.0
+	+ Added support for HTML5 local storage
+
+* 1.0.2
+	+ Removed dependency on crypto
+
+* 1.0.1
+	+ Removed hard dependencies on fs and path
+	+ Trying other hash methods usable in browser
+
+
+* 1.0.0
+	+ Initial version
