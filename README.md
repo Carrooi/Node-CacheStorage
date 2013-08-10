@@ -127,6 +127,9 @@ cache.clean(Cache.ALL);		// or cache.clean('all');
 
 ## Changelog
 
+* 1.2.1
+	+ FileStorage throw error if path does not exists or if it is a directory
+
 + 1.2.0
 	+ Bugs in dependencies parser
 	+ Written some mocha tests

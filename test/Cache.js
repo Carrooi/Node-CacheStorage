@@ -9,7 +9,7 @@
 	var path = __dirname + '/data/temp/__test.json';
 	var cache;
 
-	describe('Cache - FileStorage', function() {
+	describe('Cache', function() {
 
 		beforeEach(function() {
 			cache = new Cache(new FileStorage('./data/temp'), 'test');

@@ -1,7 +1,7 @@
 {
 	"name": "cache-storage",
 	"description": "Cache storage for node js",
-	"version": "1.2.0",
+	"version": "1.2.1",
 	"author": {
 		"name": "David Kudera",
 		"email": "sakren@gmail.com"

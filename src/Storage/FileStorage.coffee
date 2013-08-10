@@ -1,4 +1,5 @@
 fs = require 'fs'
+path = require 'path'
 Storage = require './Storage'
 Cache = require '../Cache'
 
@@ -9,6 +10,11 @@ class FileStorage extends Storage
 
 
 	constructor: (@directory) ->
+		@directory = path.resolve(@directory)
+		if !fs.existsSync(@directory)
+			throw new Error 'FileStorage: directory ' + @directory + ' does not exists'
+		if !fs.statSync(@directory).isDirectory()
+			throw new Error 'FileStorage: path ' + @directory + ' must be directory'
 
 
 	getFileName: ->
