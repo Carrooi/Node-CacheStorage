@@ -21,6 +21,9 @@ class Cache
 
 
 	constructor: (@storage, @namespace) ->
+		if @storage !instanceof require('./Storage/Storage')
+			throw new Error 'Cache: storage must be instance of cache-storage/Storage/Storage'
+
 		@storage.cache = @
 
 

@@ -21,6 +21,16 @@
 			}
 		});
 
+		describe('#constructor', function() {
+
+			it('should throw an error if storage is not instance of Storage', function() {
+				(function() {
+					new Cache(new Array)
+				}).should.throw();
+			});
+
+		});
+
 		describe('public API', function() {
 
 			it('should save true and load it', function() {

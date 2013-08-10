@@ -127,6 +127,9 @@ cache.clean(Cache.ALL);		// or cache.clean('all');
 
 ## Changelog
 
+* 1.2.2
+	+ Cache throw error if storage is not instance of Storage class
+
 * 1.2.1
 	+ FileStorage throw error if path does not exists or if it is a directory
 
