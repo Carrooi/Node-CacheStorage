@@ -24,10 +24,10 @@
 		"moment": "latest"
 	},
 	"devDependencies": {
-		"should": "1.2.2",
+		"mocha": "latest",
 		"chai": "latest"
 	},
 	"scripts": {
-		"test": "cd ./test; mocha ./node/index.js --reporter spec;"
+		"test": "cd ./test; mocha ./node/index.js --reporter spec; mocha-phantomjs ./browser/index.html;"
 	}
 }

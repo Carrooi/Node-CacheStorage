@@ -1,0 +1,27 @@
+{
+	"packages": {
+		"tests": {
+			"base": "../../",
+			"application": "./test/browser/tests.js",
+			"modules": [
+				"./src/*.coffee",
+				"./test/browser/*.coffee",
+				"./node_modules/moment/moment.js",
+				"./node_modules/moment/lang/en-gb.js"
+			],
+			"aliases": {
+				"cache-storage": "src/Cache",
+				"cache-storage/Storage/BrowserLocalStorage": "src/Storage/BrowserLocalStorage",
+				"cache-storage/Storage/FileStorage": "src/Storage/FileStorage",
+				"cache-storage/Storage/Storage": "src/Storage/Storage"
+			},
+			"run": [
+				"test/browser/Cache",
+				"test/browser/BrowserLocalStorage"
+			]
+		}
+	},
+	"debugger": {
+		"scripts": true
+	}
+}
