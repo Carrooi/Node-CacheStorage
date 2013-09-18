@@ -1,7 +1,7 @@
 {
 	"name": "cache-storage",
 	"description": "Cache storage for node js",
-	"version": "1.2.3",
+	"version": "1.2.4",
 	"author": {
 		"name": "David Kudera",
 		"email": "sakren@gmail.com"
@@ -21,12 +21,13 @@
 	},
 	"main": "./lib/Cache.js",
 	"dependencies": {
-		"moment": "2.1.0"
+		"moment": "latest"
 	},
 	"devDependencies": {
-		"should": "1.2.2"
+		"should": "1.2.2",
+		"chai": "latest"
 	},
 	"scripts": {
-		"test": "cd ./test; mocha ./index.js --reporter spec;"
+		"test": "cd ./test; mocha ./node/index.js --reporter spec;"
 	}
 }

@@ -129,6 +129,9 @@ $ npm test
 
 ## Changelog
 
+* 1.2.4
+	+ Rewritten tests
+
 * 1.2.3
 	+ Shortcut for base Storage class
 
