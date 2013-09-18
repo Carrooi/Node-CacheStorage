@@ -124,7 +124,7 @@ cache.clean(Cache.ALL);		// or cache.clean('all');
 ## Tests
 
 ```
-
+$ npm test
 ```
 
 ## Changelog
