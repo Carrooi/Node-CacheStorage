@@ -127,6 +127,9 @@ cache.clean(Cache.ALL);		// or cache.clean('all');
 
 ## Changelog
 
+* 1.2.3
+	+ Shortcut for base Storage class
+
 * 1.2.2
 	+ Cache throw error if storage is not instance of Storage class
 
