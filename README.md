@@ -1,10 +1,6 @@
 # cache-storage
 Cache storage inspired by cache in [Nette framework](http://doc.nette.org/en/caching).
 
-## Changelog
-
-Changelog is in the bottom of this readme.
-
 ## Installing
 
 ```
@@ -123,6 +119,12 @@ All items with priority 100 or below will expire.
 
 ```
 cache.clean(Cache.ALL);		// or cache.clean('all');
+```
+
+## Tests
+
+```
+
 ```
 
 ## Changelog
