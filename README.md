@@ -132,6 +132,7 @@ $ npm test
 * 1.2.4
 	+ Rewritten tests
 	+ Added tests for browser
+	+ Refactoring storages
 
 * 1.2.3
 	+ Shortcut for base Storage class
