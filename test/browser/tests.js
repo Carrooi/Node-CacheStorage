@@ -739,13 +739,115 @@ var __filename = 'test/browser/BrowserLocalStorage.coffee';
 var __dirname = 'test/browser';
 var process = {cwd: function() {return '/';}, argv: ['node', 'test/browser/BrowserLocalStorage.coffee'], env: {}};
 (function() {
-  var BrowserLocalStorage, Cache;
+  var BrowserLocalStorage, Cache, cache;
 
   Cache = require('cache-storage');
 
   BrowserLocalStorage = require('cache-storage/Storage/BrowserLocalStorage');
 
-  describe('BrowserLocalStorage', function() {});
+  cache = null;
+
+  describe('BrowserLocalStorage', function() {
+    beforeEach(function() {
+      return cache = new Cache(new BrowserLocalStorage);
+    });
+    afterEach(function() {
+      return localStorage.clear();
+    });
+    describe('saving/loading', function() {
+      it('should save true and load it', function() {
+        cache.save('true', true);
+        cache.invalidate();
+        return expect(cache.load('true')).to.be["true"];
+      });
+      it('should return null if item not exists', function() {
+        return expect(cache.load('true')).to.be["null"];
+      });
+      it('should save true and delete it', function() {
+        cache.save('true', true);
+        cache.invalidate();
+        cache.remove('true');
+        return expect(cache.load('true')).to.be["null"];
+      });
+      return it('should save true to cache from fallback function in load', function() {
+        var val;
+        val = cache.load('true', function() {
+          return true;
+        });
+        return expect(val).to.be["true"];
+      });
+    });
+    return describe('expiration', function() {
+      it('should throw an error if file dependency is required', function() {
+        return expect(function() {
+          return cache.save('true', true, {
+            files: []
+          });
+        }).to["throw"](Error);
+      });
+      it('should remove all items with tag "article"', function() {
+        cache.save('one', 'one', {
+          tags: ['article']
+        });
+        cache.save('two', 'two', {
+          tags: ['category']
+        });
+        cache.save('three', 'three', {
+          tags: ['article']
+        });
+        cache.clean({
+          tags: ['article']
+        });
+        cache.invalidate();
+        expect(cache.load('one')).to.be["null"];
+        expect(cache.load('two')).to.be.equal('two');
+        return expect(cache.load('three')).to.be["null"];
+      });
+      it('should expire "true" value after 1 second"', function(done) {
+        cache.save('true', true, {
+          expire: {
+            seconds: 1
+          }
+        });
+        cache.invalidate();
+        return setTimeout(function() {
+          expect(cache.load('true')).to.be["null"];
+          return done();
+        }, 1100);
+      });
+      it('should expire "true" value after "first" value expire', function() {
+        cache.save('first', 'first');
+        cache.save('true', true, {
+          items: ['first']
+        });
+        cache.invalidate();
+        cache.remove('first');
+        return expect(cache.load('true')).to.be["null"];
+      });
+      it('should expire all items with priority bellow 50', function() {
+        cache.save('one', 'one', {
+          priority: 100
+        });
+        cache.save('two', 'two', {
+          priority: 10
+        });
+        cache.invalidate();
+        cache.clean({
+          priority: 50
+        });
+        expect(cache.load('one')).to.be.equal('one');
+        return expect(cache.load('two')).to.be["null"];
+      });
+      return it('should remove all items from cache', function() {
+        cache.save('one', 'one');
+        cache.save('two', 'two');
+        cache.invalidate();
+        cache.clean('all');
+        expect(cache.load('one')).to.be["null"];
+        return expect(cache.load('two')).to.be["null"];
+      });
+    });
+  });
 
 }).call(this);
 
@@ -760,7 +862,15 @@ var process = {cwd: function() {return '/';}, argv: ['node', 'test/browser/Cache
 
   Cache = require('cache-storage');
 
-  describe('Cache', function() {});
+  describe('Cache', function() {
+    return describe('#constructor()', function() {
+      return it('should throw an error if storage is not an instance of Cache Storage', function() {
+        return expect(function() {
+          return new Cache(new Array);
+        }).to["throw"](Error);
+      });
+    });
+  });
 
 }).call(this);
 
