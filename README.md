@@ -56,7 +56,7 @@ var data = cache.load('some_data', function() {
 });
 ```
 
-When no data were found, then fallback annonymous function is called and data from return statement are used.
+When no data were found, then fallback anonymous function is called and data from return statement are used.
 Cache.save function always return given data.
 
 ## Removing
@@ -71,7 +71,7 @@ if (cache.load('some_data') !== null) {
 
 ## Expiration
 
-You can set some conditions and informations for every data which will be used for auto expiration or for your manual
+You can set some conditions and information for every data which will be used for auto expiration or for your manual
 expiration.
 
 ```
@@ -103,7 +103,7 @@ Now every item in cache with tag image will be removed.
 ### Expiration by date
 
 There are two ways to expire data by date. First way is to set exact date in YYYY-MM-DD HH:mm format. Second way is to
-set literal object with informations about adding date to actual date.
+set literal object with information about adding date to actual date.
 
 ```
 cache.save('some_data', 'some value of some_data', {
@@ -111,7 +111,7 @@ cache.save('some_data', 'some value of some_data', {
 });
 ```
 
-Now some_data will expire tomorow. You can see full documentation in moment.js [documentation](http://momentjs.com/docs/#/manipulating/add/).
+Now some_data will expire tomorrow. You can see full documentation in moment.js [documentation](http://momentjs.com/docs/#/manipulating/add/).
 
 ### Items expiration
 
