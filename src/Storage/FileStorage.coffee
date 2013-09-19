@@ -9,6 +9,12 @@ class FileStorage extends Storage
 
 	directory: null
 
+	allData: null
+
+	data: null
+
+	meta: null
+
 
 	constructor: (@directory) ->
 		if typeof window != 'undefined'
@@ -28,17 +34,29 @@ class FileStorage extends Storage
 		return @directory + '/__' + @cache.namespace + '.json'
 
 
-	getData: ->
-		if @data == null
+	loadData: ->
+		if @allData == null
 			file = @getFileName()
 			if fs.existsSync(file)
-				data = JSON.parse(fs.readFileSync(file, encoding: 'utf8'))
-				@data = data.data
-				@meta = data.meta
+				@allData = JSON.parse(fs.readFileSync(file, encoding: 'utf8'))
 			else
-				@data = {}
-				@meta = {}
+				@allData = {data: {}, meta: {}}
+
+		return @allData
+
+
+	getData: ->
+		if @data == null
+			@data = @loadData().data
+
 		return @data
+
+
+	getMeta: ->
+		if @meta == null
+			@meta = @loadData().meta
+
+		return @meta
 
 
 	writeData: (@data, @meta) ->

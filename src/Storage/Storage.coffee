@@ -12,14 +12,10 @@ class Storage
 
 	cache: null
 
-	data: null
-
-	meta: null
-
 
 	constructor: ->
-		if typeof @getData == 'undefined' || typeof @writeData == 'undefined'
-			throw new Error 'Cache storage: you have to implement methods getData and writeData.'
+		if typeof @getData == 'undefined' || typeof @getMeta == 'undefined' || typeof @writeData == 'undefined'
+			throw new Error 'Cache storage: you have to implement methods getData, getMeta and writeData.'
 
 
 	read: (key) ->
@@ -71,11 +67,6 @@ class Storage
 					@remove(key)
 
 		return @
-
-
-	getMeta: ->
-		if @meta == null then @getData()
-		return @meta
 
 
 	findMeta: (key) ->

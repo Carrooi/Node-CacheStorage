@@ -7,6 +7,13 @@ class BrowserLocalStorage extends Storage
 	@TEST_VALUE = '__--cache-storage--__'
 
 
+	allData: null
+
+	data: null
+
+	meta: null
+
+
 	constructor: ->
 		if !BrowserLocalStorage.isSupported()
 			throw new Error 'Cache storage: Local storage is not supported'
@@ -25,17 +32,29 @@ class BrowserLocalStorage extends Storage
 		return '__' + @cache.namespace
 
 
-	getData: ->
-		if @data == null
+	loadData: ->
+		if @allData == null
 			data = localStorage.getItem(@getName())
 			if data == null
-				@data = {}
-				@meta = {}
+				@allData = {data: {}, meta: {}}
 			else
-				data = JSON.parse(data)
-				@data = data.data
-				@meta = data.meta
+				@allData = JSON.parse(data)
+
+		return @allData
+
+
+	getData: ->
+		if @data == null
+			@data = @loadData().data
+
 		return @data
+
+
+	getMeta: ->
+		if @meta == null
+			@meta = @loadData().meta
+
+		return @meta
 
 
 	writeData: (@data, @meta) ->

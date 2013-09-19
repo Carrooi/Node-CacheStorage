@@ -147,6 +147,7 @@ $ npm test
 	+ Added DevNullStorage
 	+ Added MemoryStorage
 	+ FileStorage throws an error on browser
+	+ Refactoring storages
 
 * 1.2.4
 	+ Rewritten tests

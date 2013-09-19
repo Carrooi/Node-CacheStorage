@@ -252,6 +252,12 @@ var process = {cwd: function() {return '/';}, argv: ['node', 'src/Storage/Browse
 
     BrowserLocalStorage.TEST_VALUE = '__--cache-storage--__';
 
+    BrowserLocalStorage.prototype.allData = null;
+
+    BrowserLocalStorage.prototype.data = null;
+
+    BrowserLocalStorage.prototype.meta = null;
+
     function BrowserLocalStorage() {
       if (!BrowserLocalStorage.isSupported()) {
         throw new Error('Cache storage: Local storage is not supported');
@@ -272,20 +278,34 @@ var process = {cwd: function() {return '/';}, argv: ['node', 'src/Storage/Browse
       return '__' + this.cache.namespace;
     };
 
-    BrowserLocalStorage.prototype.getData = function() {
+    BrowserLocalStorage.prototype.loadData = function() {
       var data;
-      if (this.data === null) {
+      if (this.allData === null) {
         data = localStorage.getItem(this.getName());
         if (data === null) {
-          this.data = {};
-          this.meta = {};
+          this.allData = {
+            data: {},
+            meta: {}
+          };
         } else {
-          data = JSON.parse(data);
-          this.data = data.data;
-          this.meta = data.meta;
+          this.allData = JSON.parse(data);
         }
       }
+      return this.allData;
+    };
+
+    BrowserLocalStorage.prototype.getData = function() {
+      if (this.data === null) {
+        this.data = this.loadData().data;
+      }
       return this.data;
+    };
+
+    BrowserLocalStorage.prototype.getMeta = function() {
+      if (this.meta === null) {
+        this.meta = this.loadData().meta;
+      }
+      return this.meta;
     };
 
     BrowserLocalStorage.prototype.writeData = function(data, meta) {
@@ -387,6 +407,12 @@ var process = {cwd: function() {return '/';}, argv: ['node', 'src/Storage/FileSt
 
     FileStorage.prototype.directory = null;
 
+    FileStorage.prototype.allData = null;
+
+    FileStorage.prototype.data = null;
+
+    FileStorage.prototype.meta = null;
+
     function FileStorage(directory) {
       this.directory = directory;
       if (typeof window !== 'undefined') {
@@ -407,22 +433,36 @@ var process = {cwd: function() {return '/';}, argv: ['node', 'src/Storage/FileSt
       return this.directory + '/__' + this.cache.namespace + '.json';
     };
 
-    FileStorage.prototype.getData = function() {
-      var data, file;
-      if (this.data === null) {
+    FileStorage.prototype.loadData = function() {
+      var file;
+      if (this.allData === null) {
         file = this.getFileName();
         if (fs.existsSync(file)) {
-          data = JSON.parse(fs.readFileSync(file, {
+          this.allData = JSON.parse(fs.readFileSync(file, {
             encoding: 'utf8'
           }));
-          this.data = data.data;
-          this.meta = data.meta;
         } else {
-          this.data = {};
-          this.meta = {};
+          this.allData = {
+            data: {},
+            meta: {}
+          };
         }
       }
+      return this.allData;
+    };
+
+    FileStorage.prototype.getData = function() {
+      if (this.data === null) {
+        this.data = this.loadData().data;
+      }
       return this.data;
+    };
+
+    FileStorage.prototype.getMeta = function() {
+      if (this.meta === null) {
+        this.meta = this.loadData().meta;
+      }
+      return this.meta;
     };
 
     FileStorage.prototype.writeData = function(data, meta) {
@@ -466,12 +506,22 @@ var process = {cwd: function() {return '/';}, argv: ['node', 'src/Storage/Memory
       return MemoryStorage.__super__.constructor.apply(this, arguments);
     }
 
+    MemoryStorage.prototype.data = null;
+
+    MemoryStorage.prototype.meta = null;
+
     MemoryStorage.prototype.getData = function() {
       if (this.data === null) {
         this.data = {};
-        this.meta = {};
       }
       return this.data;
+    };
+
+    MemoryStorage.prototype.getMeta = function() {
+      if (this.meta === null) {
+        this.meta = {};
+      }
+      return this.meta;
     };
 
     MemoryStorage.prototype.writeData = function(data, meta) {
@@ -512,13 +562,9 @@ var process = {cwd: function() {return '/';}, argv: ['node', 'src/Storage/Storag
 
     Storage.prototype.cache = null;
 
-    Storage.prototype.data = null;
-
-    Storage.prototype.meta = null;
-
     function Storage() {
-      if (typeof this.getData === 'undefined' || typeof this.writeData === 'undefined') {
-        throw new Error('Cache storage: you have to implement methods getData and writeData.');
+      if (typeof this.getData === 'undefined' || typeof this.getMeta === 'undefined' || typeof this.writeData === 'undefined') {
+        throw new Error('Cache storage: you have to implement methods getData, getMeta and writeData.');
       }
     }
 
@@ -592,13 +638,6 @@ var process = {cwd: function() {return '/';}, argv: ['node', 'src/Storage/Storag
         }
       }
       return this;
-    };
-
-    Storage.prototype.getMeta = function() {
-      if (this.meta === null) {
-        this.getData();
-      }
-      return this.meta;
     };
 
     Storage.prototype.findMeta = function(key) {
