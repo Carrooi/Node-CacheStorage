@@ -1,5 +1,8 @@
 # cache-storage
+
 Advanced cache storage inspired by cache in [Nette framework](http://doc.nette.org/en/caching).
+
+Can be also used in browser for example with [simq](https://npmjs.org/package/simq).
 
 ## Installing
 
