@@ -135,6 +135,7 @@ $ npm test
 	+ Rewritten tests
 	+ Added tests for browser
 	+ Refactoring storages
+	+ Bad encoding in FileStorage
 
 * 1.2.3
 	+ Shortcut for base Storage class
