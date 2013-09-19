@@ -1,6 +1,6 @@
 {
 	"name": "cache-storage",
-	"description": "Cache storage for node js",
+	"description": "Advanced cache storage for node js",
 	"version": "1.3.0",
 	"author": {
 		"name": "David Kudera",
@@ -9,7 +9,8 @@
 	"keywords": [
 		"cache",
 		"caching",
-		"storage"
+		"storage",
+		"memory"
 	],
 	"repository": {
 		"type": "git",

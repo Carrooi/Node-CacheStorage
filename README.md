@@ -1,5 +1,5 @@
 # cache-storage
-Cache storage inspired by cache in [Nette framework](http://doc.nette.org/en/caching).
+Advanced cache storage inspired by cache in [Nette framework](http://doc.nette.org/en/caching).
 
 ## Installing
 
