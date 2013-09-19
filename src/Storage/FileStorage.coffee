@@ -25,7 +25,7 @@ class FileStorage extends Storage
 		if @data == null
 			file = @getFileName()
 			if fs.existsSync(file)
-				data = JSON.parse(fs.readFileSync(file, encoding: 'utf-8'))
+				data = JSON.parse(fs.readFileSync(file, encoding: 'utf8'))
 				@data = data.data
 				@meta = data.meta
 			else

@@ -356,7 +356,7 @@ var process = {cwd: function() {return '/';}, argv: ['node', 'src/Storage/FileSt
         file = this.getFileName();
         if (fs.existsSync(file)) {
           data = JSON.parse(fs.readFileSync(file, {
-            encoding: 'utf-8'
+            encoding: 'utf8'
           }));
           this.data = data.data;
           this.meta = data.meta;
