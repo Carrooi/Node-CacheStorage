@@ -311,6 +311,62 @@ var process = {cwd: function() {return '/';}, argv: ['node', 'src/Storage/Browse
 }).call(this);
 
 },
+'src/Storage/DevNullStorage.coffee': function(exports, __require, module) {
+var require = function(name) {return __require(name, 'src/Storage/DevNullStorage.coffee');};
+var __filename = 'src/Storage/DevNullStorage.coffee';
+var __dirname = 'src/Storage';
+var process = {cwd: function() {return '/';}, argv: ['node', 'src/Storage/DevNullStorage.coffee'], env: {}};
+(function() {
+  var DevNullStorage, Storage,
+    __hasProp = {}.hasOwnProperty,
+    __extends = function(child, parent) { for (var key in parent) { if (__hasProp.call(parent, key)) child[key] = parent[key]; } function ctor() { this.constructor = child; } ctor.prototype = parent.prototype; child.prototype = new ctor(); child.__super__ = parent.prototype; return child; };
+
+  Storage = require('./Storage');
+
+  DevNullStorage = (function(_super) {
+
+    __extends(DevNullStorage, _super);
+
+    function DevNullStorage() {
+      return DevNullStorage.__super__.constructor.apply(this, arguments);
+    }
+
+    DevNullStorage.prototype.getData = function() {
+      return {};
+    };
+
+    DevNullStorage.prototype.getMeta = function() {
+      return {};
+    };
+
+    DevNullStorage.prototype.writeData = function(data, meta) {
+      return this;
+    };
+
+    DevNullStorage.prototype.read = function(key) {
+      return null;
+    };
+
+    DevNullStorage.prototype.write = function(key, data, dependencies) {
+      if (dependencies == null) {
+        dependencies = {};
+      }
+      return this;
+    };
+
+    DevNullStorage.prototype.remove = function(key) {
+      return this;
+    };
+
+    return DevNullStorage;
+
+  })(Storage);
+
+  module.exports = DevNullStorage;
+
+}).call(this);
+
+},
 'src/Storage/FileStorage.coffee': function(exports, __require, module) {
 var require = function(name) {return __require(name, 'src/Storage/FileStorage.coffee');};
 var __filename = 'src/Storage/FileStorage.coffee';
@@ -770,6 +826,53 @@ var process = {cwd: function() {return '/';}, argv: ['node', 'test/browser/Cache
         return expect(function() {
           return new Cache(new Array);
         }).to["throw"](Error);
+      });
+    });
+  });
+
+}).call(this);
+
+},
+'test/browser/DevNullStorage.coffee': function(exports, __require, module) {
+var require = function(name) {return __require(name, 'test/browser/DevNullStorage.coffee');};
+var __filename = 'test/browser/DevNullStorage.coffee';
+var __dirname = 'test/browser';
+var process = {cwd: function() {return '/';}, argv: ['node', 'test/browser/DevNullStorage.coffee'], env: {}};
+(function() {
+  var Cache, DevNullStorage, cache;
+
+  Cache = require('cache-storage');
+
+  DevNullStorage = require('cache-storage/Storage/DevNullStorage');
+
+  cache = null;
+
+  describe('DevNullStorage', function() {
+    beforeEach(function() {
+      return cache = new Cache(new DevNullStorage);
+    });
+    return describe('saving/loading', function() {
+      it('should not save true', function() {
+        cache.save('true', true);
+        cache.invalidate();
+        return expect(cache.load('true')).to.be["null"];
+      });
+      it('should always return null', function() {
+        return expect(cache.load('true')).to.be["null"];
+      });
+      it('should not save true and try to delete it', function() {
+        cache.save('true', true);
+        cache.invalidate();
+        cache.remove('true');
+        return expect(cache.load('true')).to.be["null"];
+      });
+      return it('should not save true to cache from fallback function in load', function() {
+        var val;
+        val = cache.load('true', function() {
+          return true;
+        });
+        expect(val).to.be["true"];
+        return expect(cache.load('true')).to.be["null"];
       });
     });
   });
@@ -2631,6 +2734,7 @@ var process = {cwd: function() {return '/';}, argv: ['node', 'node_modules/momen
 },
 'cache-storage': 'src/Cache',
 'cache-storage/Storage/BrowserLocalStorage': 'src/Storage/BrowserLocalStorage',
+'cache-storage/Storage/DevNullStorage': 'src/Storage/DevNullStorage',
 'cache-storage/Storage/FileStorage': 'src/Storage/FileStorage',
 'cache-storage/Storage/Storage': 'src/Storage/Storage'
 });
@@ -2641,3 +2745,5 @@ require._setMeta({"cache-storage":{"base":"","path":"lib/Cache.js"},"moment":{"b
 require('test/browser/Cache');
 
 require('test/browser/BrowserLocalStorage');
+
+require('test/browser/DevNullStorage');

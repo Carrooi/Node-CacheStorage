@@ -23,6 +23,7 @@ more than one independent caches.
 
 * FileStorage (cache-storage/Storage/FileStorage - saving data to json files)
 * BrowserLocalStorage (cache-storage/Storage/BrowserLocalStorage - saving data to HTML5 local storage)
+* DevNullStorage (cache-storage/Storage/DevNullStorage - does not save anything and load always null)
 
 More storages will be added in future.
 
@@ -130,6 +131,9 @@ $ npm test
 ```
 
 ## Changelog
+
+* 1.3.0
+	+ Added DevNullStorage
 
 * 1.2.4
 	+ Rewritten tests

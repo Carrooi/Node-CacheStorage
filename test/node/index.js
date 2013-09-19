@@ -6,4 +6,6 @@
 
   require('./BrowserLocalStorage');
 
+  require('./DevNullStorage');
+
 }).call(this);
