@@ -302,85 +302,6 @@ var process = {cwd: function() {return '/';}, argv: ['node', 'src/Storage/Browse
       return this;
     };
 
-    BrowserLocalStorage.prototype.getMeta = function() {
-      if (this.meta === null) {
-        this.getData();
-      }
-      return this.meta;
-    };
-
-    BrowserLocalStorage.prototype.read = function(key) {
-      var data;
-      data = this.getData();
-      if (typeof data[key] === 'undefined') {
-        return null;
-      } else {
-        if (this.verify(this.findMeta(key))) {
-          return data[key];
-        } else {
-          this.remove(key);
-          return null;
-        }
-      }
-    };
-
-    BrowserLocalStorage.prototype.write = function(key, data, dependencies) {
-      var all, meta;
-      if (dependencies == null) {
-        dependencies = {};
-      }
-      all = this.getData();
-      all[key] = data;
-      meta = this.getMeta();
-      meta[key] = dependencies;
-      this.writeData(all, meta);
-      return this;
-    };
-
-    BrowserLocalStorage.prototype.remove = function(key) {
-      var data, meta;
-      data = this.getData();
-      meta = this.getMeta();
-      if (typeof data[key] !== 'undefined') {
-        delete data[key];
-        delete meta[key];
-      }
-      this.writeData(data, meta);
-      return this;
-    };
-
-    BrowserLocalStorage.prototype.clean = function(conditions) {
-      var key, tag, type, typeFn, _i, _j, _k, _len, _len1, _len2, _ref, _ref1, _ref2;
-      typeFn = Object.prototype.toString;
-      type = typeFn.call(conditions);
-      if (conditions === Cache.ALL / this.writeData({}, {})) {
-
-      } else if (type === '[object Object]') {
-        if (typeof conditions[Cache.TAGS] !== 'undefined') {
-          if (typeFn(conditions[Cache.TAGS]) === '[object String]') {
-            conditions[Cache.TAGS] = [conditions[Cache.TAGS]];
-          }
-          _ref = conditions[Cache.TAGS];
-          for (_i = 0, _len = _ref.length; _i < _len; _i++) {
-            tag = _ref[_i];
-            _ref1 = this.findKeysByTag(tag);
-            for (_j = 0, _len1 = _ref1.length; _j < _len1; _j++) {
-              key = _ref1[_j];
-              this.remove(key);
-            }
-          }
-        }
-        if (typeof conditions[Cache.PRIORITY] !== 'undefined') {
-          _ref2 = this.findKeysByPriority(conditions[Cache.PRIORITY]);
-          for (_k = 0, _len2 = _ref2.length; _k < _len2; _k++) {
-            key = _ref2[_k];
-            this.remove(key);
-          }
-        }
-      }
-      return this;
-    };
-
     return BrowserLocalStorage;
 
   })(Storage);
@@ -459,14 +380,49 @@ var process = {cwd: function() {return '/';}, argv: ['node', 'src/Storage/FileSt
       return this;
     };
 
-    FileStorage.prototype.getMeta = function() {
-      if (this.meta === null) {
-        this.getData();
-      }
-      return this.meta;
-    };
+    return FileStorage;
 
-    FileStorage.prototype.read = function(key) {
+  })(Storage);
+
+  module.exports = FileStorage;
+
+}).call(this);
+
+},
+'src/Storage/Storage.coffee': function(exports, __require, module) {
+var require = function(name) {return __require(name, 'src/Storage/Storage.coffee');};
+var __filename = 'src/Storage/Storage.coffee';
+var __dirname = 'src/Storage';
+var process = {cwd: function() {return '/';}, argv: ['node', 'src/Storage/Storage.coffee'], env: {}};
+(function() {
+  var Cache, Storage, fs, isWindow, moment, path;
+
+  isWindow = typeof window === 'undefined' ? false : true;
+
+  if (!isWindow) {
+    fs = require('fs');
+    path = require('path');
+  }
+
+  moment = require('moment');
+
+  Cache = require('../Cache');
+
+  Storage = (function() {
+
+    Storage.prototype.cache = null;
+
+    Storage.prototype.data = null;
+
+    Storage.prototype.meta = null;
+
+    function Storage() {
+      if (typeof this.getData === 'undefined' || typeof this.writeData === 'undefined') {
+        throw new Error('Cache storage: you have to implement methods getData and writeData.');
+      }
+    }
+
+    Storage.prototype.read = function(key) {
       var data;
       data = this.getData();
       if (typeof data[key] === 'undefined') {
@@ -481,7 +437,7 @@ var process = {cwd: function() {return '/';}, argv: ['node', 'src/Storage/FileSt
       }
     };
 
-    FileStorage.prototype.write = function(key, data, dependencies) {
+    Storage.prototype.write = function(key, data, dependencies) {
       var all, meta;
       if (dependencies == null) {
         dependencies = {};
@@ -494,7 +450,7 @@ var process = {cwd: function() {return '/';}, argv: ['node', 'src/Storage/FileSt
       return this;
     };
 
-    FileStorage.prototype.remove = function(key) {
+    Storage.prototype.remove = function(key) {
       var data, meta;
       data = this.getData();
       meta = this.getMeta();
@@ -506,7 +462,7 @@ var process = {cwd: function() {return '/';}, argv: ['node', 'src/Storage/FileSt
       return this;
     };
 
-    FileStorage.prototype.clean = function(conditions) {
+    Storage.prototype.clean = function(conditions) {
       var key, tag, type, typeFn, _i, _j, _k, _len, _len1, _len2, _ref, _ref1, _ref2;
       typeFn = Object.prototype.toString;
       type = typeFn.call(conditions);
@@ -538,65 +494,11 @@ var process = {cwd: function() {return '/';}, argv: ['node', 'src/Storage/FileSt
       return this;
     };
 
-    return FileStorage;
-
-  })(Storage);
-
-  module.exports = FileStorage;
-
-}).call(this);
-
-},
-'src/Storage/Storage.coffee': function(exports, __require, module) {
-var require = function(name) {return __require(name, 'src/Storage/Storage.coffee');};
-var __filename = 'src/Storage/Storage.coffee';
-var __dirname = 'src/Storage';
-var process = {cwd: function() {return '/';}, argv: ['node', 'src/Storage/Storage.coffee'], env: {}};
-(function() {
-  var Cache, Storage, fs, isWindow, moment, path;
-
-  isWindow = typeof window === 'undefined' ? false : true;
-
-  if (!isWindow) {
-    fs = require('fs');
-    path = require('path');
-  }
-
-  moment = require('moment');
-
-  Cache = require('../Cache');
-
-  Storage = (function() {
-
-    function Storage() {}
-
-    Storage.prototype.cache = null;
-
-    Storage.prototype.data = null;
-
-    Storage.prototype.meta = null;
-
-    Storage.prototype.read = function(key) {
-      throw new Error('Cache storage: read method is not implemented.');
-    };
-
-    Storage.prototype.write = function(key, data, dependencies) {
-      if (dependencies == null) {
-        dependencies = {};
-      }
-      throw new Error('Cache storage: write method is not implemented.');
-    };
-
-    Storage.prototype.remove = function(key) {
-      throw new Error('Cache storage: remove method is not implemented.');
-    };
-
-    Storage.prototype.clean = function(conditions) {
-      throw new Error('Cache storage: clean method is not implemented');
-    };
-
     Storage.prototype.getMeta = function() {
-      throw new Error('Cache storage: getMeta method is not implemented');
+      if (this.meta === null) {
+        this.getData();
+      }
+      return this.meta;
     };
 
     Storage.prototype.invalidate = function() {
