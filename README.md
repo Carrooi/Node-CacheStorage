@@ -27,6 +27,14 @@ more than one independent caches.
 
 More storages will be added in future.
 
+### Only node storages
+
+* FileStorage
+
+### Only browser storages
+
+* BrowserLocalStorage
+
 ## Loading & saving
 
 ```
@@ -79,6 +87,8 @@ cache.save('some_data', 'some value of some_data', {
 ### Expiration by files
 
 If you set files to save function, then that item will expire when some of given files is changed.
+
+This type of expiration is not available on browser.
 
 ### Expiration by tags
 
