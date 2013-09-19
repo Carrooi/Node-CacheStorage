@@ -28,6 +28,6 @@
 		"chai": "latest"
 	},
 	"scripts": {
-		"test": "cd ./test; mocha ./node/index.js --reporter spec; mocha-phantomjs ./browser/index.html;"
+		"test": "cd ./test; echo \"Testing in node:\"; mocha ./node/index.js --reporter spec; echo \"Testing in browser:\"; mocha-phantomjs ./browser/index.html;"
 	}
 }
