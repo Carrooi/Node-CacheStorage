@@ -78,11 +78,6 @@ class Storage
 		return @meta
 
 
-	invalidate: ->
-		@data = null
-		@meta = null
-
-
 	findMeta: (key) ->
 		meta = @getMeta()
 		return if typeof meta[key] != 'undefined' then meta[key] else null

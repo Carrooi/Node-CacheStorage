@@ -17,7 +17,6 @@
       });
       it('should not save true', function() {
         cache.save('true', true);
-        cache.invalidate();
         return expect(cache.load('true')).to.be["null"];
       });
       it('should always return null', function() {
@@ -25,7 +24,6 @@
       });
       it('should not save true and try to delete it', function() {
         cache.save('true', true);
-        cache.invalidate();
         cache.remove('true');
         return expect(cache.load('true')).to.be["null"];
       });

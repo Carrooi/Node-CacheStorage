@@ -42,7 +42,6 @@
       });
       it('should save true and load it', function() {
         cache.save('true', true);
-        cache.invalidate();
         return expect(cache.load('true')).to.be["true"];
       });
       it('should return null if item not exists', function() {
@@ -50,7 +49,6 @@
       });
       it('should save true and delete it', function() {
         cache.save('true', true);
-        cache.invalidate();
         cache.remove('true');
         return expect(cache.load('true')).to.be["null"];
       });
@@ -76,7 +74,6 @@
           files: [file]
         });
         fs.writeFileSync(file, '');
-        cache.invalidate();
         return expect(cache.load('true')).to.be["null"];
       });
       it('should remove all items with tag "article"', function() {
@@ -92,7 +89,6 @@
         cache.clean({
           tags: ['article']
         });
-        cache.invalidate();
         expect(cache.load('one')).to.be["null"];
         expect(cache.load('two')).to.be.equal('two');
         return expect(cache.load('three')).to.be["null"];
@@ -103,7 +99,6 @@
             seconds: 1
           }
         });
-        cache.invalidate();
         return setTimeout(function() {
           expect(cache.load('true')).to.be["null"];
           return done();
@@ -114,7 +109,6 @@
         cache.save('true', true, {
           items: ['first']
         });
-        cache.invalidate();
         cache.remove('first');
         return expect(cache.load('true')).to.be["null"];
       });
@@ -125,7 +119,6 @@
         cache.save('two', 'two', {
           priority: 10
         });
-        cache.invalidate();
         cache.clean({
           priority: 50
         });
@@ -135,7 +128,6 @@
       return it('should remove all items from cache', function() {
         cache.save('one', 'one');
         cache.save('two', 'two');
-        cache.invalidate();
         cache.clean('all');
         expect(cache.load('one')).to.be["null"];
         return expect(cache.load('two')).to.be["null"];

@@ -186,10 +186,6 @@ var process = {cwd: function() {return '/';}, argv: ['node', 'src/Cache.coffee']
       return hash;
     };
 
-    Cache.prototype.invalidate = function() {
-      return this.storage.invalidate();
-    };
-
     Cache.prototype.load = function(key, fallback) {
       var data;
       if (fallback == null) {
@@ -605,11 +601,6 @@ var process = {cwd: function() {return '/';}, argv: ['node', 'src/Storage/Storag
       return this.meta;
     };
 
-    Storage.prototype.invalidate = function() {
-      this.data = null;
-      return this.meta = null;
-    };
-
     Storage.prototype.findMeta = function(key) {
       var meta;
       meta = this.getMeta();
@@ -763,7 +754,6 @@ var process = {cwd: function() {return '/';}, argv: ['node', 'test/browser/Brows
     describe('saving/loading', function() {
       it('should save true and load it', function() {
         cache.save('true', true);
-        cache.invalidate();
         return expect(cache.load('true')).to.be["true"];
       });
       it('should return null if item not exists', function() {
@@ -771,7 +761,6 @@ var process = {cwd: function() {return '/';}, argv: ['node', 'test/browser/Brows
       });
       it('should save true and delete it', function() {
         cache.save('true', true);
-        cache.invalidate();
         cache.remove('true');
         return expect(cache.load('true')).to.be["null"];
       });
@@ -804,7 +793,6 @@ var process = {cwd: function() {return '/';}, argv: ['node', 'test/browser/Brows
         cache.clean({
           tags: ['article']
         });
-        cache.invalidate();
         expect(cache.load('one')).to.be["null"];
         expect(cache.load('two')).to.be.equal('two');
         return expect(cache.load('three')).to.be["null"];
@@ -815,7 +803,6 @@ var process = {cwd: function() {return '/';}, argv: ['node', 'test/browser/Brows
             seconds: 1
           }
         });
-        cache.invalidate();
         return setTimeout(function() {
           expect(cache.load('true')).to.be["null"];
           return done();
@@ -826,7 +813,6 @@ var process = {cwd: function() {return '/';}, argv: ['node', 'test/browser/Brows
         cache.save('true', true, {
           items: ['first']
         });
-        cache.invalidate();
         cache.remove('first');
         return expect(cache.load('true')).to.be["null"];
       });
@@ -837,7 +823,6 @@ var process = {cwd: function() {return '/';}, argv: ['node', 'test/browser/Brows
         cache.save('two', 'two', {
           priority: 10
         });
-        cache.invalidate();
         cache.clean({
           priority: 50
         });
@@ -847,7 +832,6 @@ var process = {cwd: function() {return '/';}, argv: ['node', 'test/browser/Brows
       return it('should remove all items from cache', function() {
         cache.save('one', 'one');
         cache.save('two', 'two');
-        cache.invalidate();
         cache.clean('all');
         expect(cache.load('one')).to.be["null"];
         return expect(cache.load('two')).to.be["null"];
@@ -902,7 +886,6 @@ var process = {cwd: function() {return '/';}, argv: ['node', 'test/browser/DevNu
     return describe('saving/loading', function() {
       it('should not save true', function() {
         cache.save('true', true);
-        cache.invalidate();
         return expect(cache.load('true')).to.be["null"];
       });
       it('should always return null', function() {
@@ -910,7 +893,6 @@ var process = {cwd: function() {return '/';}, argv: ['node', 'test/browser/DevNu
       });
       it('should not save true and try to delete it', function() {
         cache.save('true', true);
-        cache.invalidate();
         cache.remove('true');
         return expect(cache.load('true')).to.be["null"];
       });

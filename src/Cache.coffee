@@ -39,10 +39,6 @@ class Cache
 		return hash
 
 
-	invalidate: ->
-		@storage.invalidate()
-
-
 	load: (key, fallback = null) ->
 		data = @storage.read(@generateKey(key))
 		if data == null && fallback != null

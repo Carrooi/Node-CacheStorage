@@ -31,7 +31,6 @@ describe 'FileStorage', ->
 
 		it 'should save true and load it', ->
 			cache.save 'true', true
-			cache.invalidate()
 			expect(cache.load 'true').to.be.true
 
 		it 'should return null if item not exists', ->
@@ -39,7 +38,6 @@ describe 'FileStorage', ->
 
 		it 'should save true and delete it', ->
 			cache.save 'true', true
-			cache.invalidate()
 			cache.remove 'true'
 			expect(cache.load 'true').to.be.null
 
@@ -61,7 +59,6 @@ describe 'FileStorage', ->
 		it 'should expire "true" value after file is changed', ->
 			cache.save 'true', true, {files: [file]}
 			fs.writeFileSync(file, '')
-			cache.invalidate()
 			expect(cache.load 'true').to.be.null
 
 		it 'should remove all items with tag "article"', ->
@@ -69,14 +66,12 @@ describe 'FileStorage', ->
 			cache.save 'two', 'two', {tags: ['category']}
 			cache.save 'three', 'three', {tags: ['article']}
 			cache.clean tags: ['article']
-			cache.invalidate()
 			expect(cache.load 'one').to.be.null
 			expect(cache.load 'two').to.be.equal 'two'
 			expect(cache.load 'three').to.be.null
 
 		it 'should expire "true" value after 1 second"', (done) ->
 			cache.save 'true', true, {expire: {seconds: 1}}
-			cache.invalidate()
 			setTimeout( ->
 				expect(cache.load 'true').to.be.null
 				done()
@@ -85,14 +80,12 @@ describe 'FileStorage', ->
 		it 'should expire "true" value after "first" value expire', ->
 			cache.save 'first', 'first'
 			cache.save 'true', true, {items: ['first']}
-			cache.invalidate()
 			cache.remove 'first'
 			expect(cache.load 'true').to.be.null
 
 		it 'should expire all items with priority bellow 50', ->
 			cache.save 'one', 'one', {priority: 100}
 			cache.save 'two', 'two', {priority: 10}
-			cache.invalidate()
 			cache.clean {priority: 50}
 			expect(cache.load 'one').to.be.equal('one')
 			expect(cache.load 'two').to.be.null
@@ -100,7 +93,6 @@ describe 'FileStorage', ->
 		it 'should remove all items from cache', ->
 			cache.save 'one', 'one'
 			cache.save 'two', 'two'
-			cache.invalidate()
 			cache.clean 'all'
 			expect(cache.load 'one').to.be.null
 			expect(cache.load 'two').to.be.null

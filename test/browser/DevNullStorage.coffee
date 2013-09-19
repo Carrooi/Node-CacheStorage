@@ -14,7 +14,6 @@ describe 'DevNullStorage', ->
 
 		it 'should not save true', ->
 			cache.save 'true', true
-			cache.invalidate()
 			expect(cache.load 'true').to.be.null
 
 		it 'should always return null', ->
@@ -22,7 +21,6 @@ describe 'DevNullStorage', ->
 
 		it 'should not save true and try to delete it', ->
 			cache.save 'true', true
-			cache.invalidate()
 			cache.remove 'true'
 			expect(cache.load 'true').to.be.null
 
