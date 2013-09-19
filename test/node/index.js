@@ -8,4 +8,6 @@
 
   require('./DevNullStorage');
 
+  require('./MemoryStorage');
+
 }).call(this);

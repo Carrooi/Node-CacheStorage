@@ -450,6 +450,49 @@ var process = {cwd: function() {return '/';}, argv: ['node', 'src/Storage/FileSt
 }).call(this);
 
 },
+'src/Storage/MemoryStorage.coffee': function(exports, __require, module) {
+var require = function(name) {return __require(name, 'src/Storage/MemoryStorage.coffee');};
+var __filename = 'src/Storage/MemoryStorage.coffee';
+var __dirname = 'src/Storage';
+var process = {cwd: function() {return '/';}, argv: ['node', 'src/Storage/MemoryStorage.coffee'], env: {}};
+(function() {
+  var MemoryStorage, Storage,
+    __hasProp = {}.hasOwnProperty,
+    __extends = function(child, parent) { for (var key in parent) { if (__hasProp.call(parent, key)) child[key] = parent[key]; } function ctor() { this.constructor = child; } ctor.prototype = parent.prototype; child.prototype = new ctor(); child.__super__ = parent.prototype; return child; };
+
+  Storage = require('./Storage');
+
+  MemoryStorage = (function(_super) {
+
+    __extends(MemoryStorage, _super);
+
+    function MemoryStorage() {
+      return MemoryStorage.__super__.constructor.apply(this, arguments);
+    }
+
+    MemoryStorage.prototype.getData = function() {
+      if (this.data === null) {
+        this.data = {};
+        this.meta = {};
+      }
+      return this.data;
+    };
+
+    MemoryStorage.prototype.writeData = function(data, meta) {
+      this.data = data;
+      this.meta = meta;
+      return this;
+    };
+
+    return MemoryStorage;
+
+  })(Storage);
+
+  module.exports = MemoryStorage;
+
+}).call(this);
+
+},
 'src/Storage/Storage.coffee': function(exports, __require, module) {
 var require = function(name) {return __require(name, 'src/Storage/Storage.coffee');};
 var __filename = 'src/Storage/Storage.coffee';
@@ -901,6 +944,108 @@ var process = {cwd: function() {return '/';}, argv: ['node', 'test/browser/FileS
         return expect(function() {
           return new FileStorage;
         }).to["throw"](Error);
+      });
+    });
+  });
+
+}).call(this);
+
+},
+'test/browser/MemoryStorage.coffee': function(exports, __require, module) {
+var require = function(name) {return __require(name, 'test/browser/MemoryStorage.coffee');};
+var __filename = 'test/browser/MemoryStorage.coffee';
+var __dirname = 'test/browser';
+var process = {cwd: function() {return '/';}, argv: ['node', 'test/browser/MemoryStorage.coffee'], env: {}};
+(function() {
+  var Cache, MemoryStorage, cache;
+
+  Cache = require('cache-storage');
+
+  MemoryStorage = require('cache-storage/Storage/MemoryStorage');
+
+  cache = null;
+
+  describe('MemoryStorage', function() {
+    beforeEach(function() {
+      return cache = new Cache(new MemoryStorage, 'test');
+    });
+    describe('saving/loading', function() {
+      it('should save true and load it', function() {
+        cache.save('true', true);
+        return expect(cache.load('true')).to.be["true"];
+      });
+      it('should return null if item not exists', function() {
+        return expect(cache.load('true')).to.be["null"];
+      });
+      it('should save true and delete it', function() {
+        cache.save('true', true);
+        cache.remove('true');
+        return expect(cache.load('true')).to.be["null"];
+      });
+      return it('should save true to cache from fallback function in load', function() {
+        var val;
+        val = cache.load('true', function() {
+          return true;
+        });
+        return expect(val).to.be["true"];
+      });
+    });
+    return describe('expiration', function() {
+      it('should remove all items with tag "article"', function() {
+        cache.save('one', 'one', {
+          tags: ['article']
+        });
+        cache.save('two', 'two', {
+          tags: ['category']
+        });
+        cache.save('three', 'three', {
+          tags: ['article']
+        });
+        cache.clean({
+          tags: ['article']
+        });
+        expect(cache.load('one')).to.be["null"];
+        expect(cache.load('two')).to.be.equal('two');
+        return expect(cache.load('three')).to.be["null"];
+      });
+      it('should expire "true" value after 1 second"', function(done) {
+        cache.save('true', true, {
+          expire: {
+            seconds: 1
+          }
+        });
+        return setTimeout(function() {
+          expect(cache.load('true')).to.be["null"];
+          return done();
+        }, 1100);
+      });
+      it('should expire "true" value after "first" value expire', function() {
+        cache.save('first', 'first');
+        cache.save('true', true, {
+          items: ['first']
+        });
+        cache.remove('first');
+        return expect(cache.load('true')).to.be["null"];
+      });
+      it('should expire all items with priority bellow 50', function() {
+        cache.save('one', 'one', {
+          priority: 100
+        });
+        cache.save('two', 'two', {
+          priority: 10
+        });
+        cache.clean({
+          priority: 50
+        });
+        expect(cache.load('one')).to.be.equal('one');
+        return expect(cache.load('two')).to.be["null"];
+      });
+      return it('should remove all items from cache', function() {
+        cache.save('one', 'one');
+        cache.save('two', 'two');
+        cache.clean('all');
+        expect(cache.load('one')).to.be["null"];
+        return expect(cache.load('two')).to.be["null"];
       });
     });
   });
@@ -2764,6 +2909,7 @@ var process = {cwd: function() {return '/';}, argv: ['node', 'node_modules/momen
 'cache-storage/Storage/BrowserLocalStorage': 'src/Storage/BrowserLocalStorage',
 'cache-storage/Storage/DevNullStorage': 'src/Storage/DevNullStorage',
 'cache-storage/Storage/FileStorage': 'src/Storage/FileStorage',
+'cache-storage/Storage/MemoryStorage': 'src/Storage/MemoryStorage',
 'cache-storage/Storage/Storage': 'src/Storage/Storage'
 });
 
@@ -2777,3 +2923,5 @@ require('test/browser/BrowserLocalStorage');
 require('test/browser/FileStorage');
 
 require('test/browser/DevNullStorage');
+
+require('test/browser/MemoryStorage');
