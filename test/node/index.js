@@ -4,4 +4,6 @@
 
   require('./FileStorage');
 
+  require('./BrowserLocalStorage');
+
 }).call(this);
