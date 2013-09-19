@@ -17,24 +17,65 @@ class Storage
 	meta: null
 
 
+	constructor: ->
+		if typeof @getData == 'undefined' || typeof @writeData == 'undefined'
+			throw new Error 'Cache storage: you have to implement methods getData and writeData.'
+
+
 	read: (key) ->
-		throw new Error 'Cache storage: read method is not implemented.'
+		data = @getData()
+		if typeof data[key] == 'undefined'
+			return null
+		else
+			if @verify(@findMeta(key))
+				return data[key]
+			else
+				@remove(key)
+				return null
 
 
 	write: (key, data, dependencies = {}) ->
-		throw new Error 'Cache storage: write method is not implemented.'
+		all = @getData()
+		all[key] = data
+		meta = @getMeta()
+		meta[key] = dependencies
+		@writeData(all, meta)
+		return @
 
 
 	remove: (key) ->
-		throw new Error 'Cache storage: remove method is not implemented.'
+		data = @getData()
+		meta = @getMeta()
+		if typeof data[key] != 'undefined'
+			delete data[key]
+			delete meta[key]
+		@writeData(data, meta)
+		return @
 
 
 	clean: (conditions) ->
-		throw new Error 'Cache storage: clean method is not implemented'
+		typeFn = Object.prototype.toString
+		type = typeFn.call(conditions)
+		if conditions == Cache.ALL
+			@writeData({}, {})
+
+		else if type == '[object Object]'
+			if typeof conditions[Cache.TAGS] != 'undefined'
+				if typeFn(conditions[Cache.TAGS]) == '[object String]' then conditions[Cache.TAGS] = [conditions[Cache.TAGS]]
+				for tag in conditions[Cache.TAGS]
+					for key in @findKeysByTag(tag)
+						@remove(key)
+
+			if typeof conditions[Cache.PRIORITY] != 'undefined'
+				for key in @findKeysByPriority(conditions[Cache.PRIORITY])
+					@remove(key)
+
+		return @
 
 
 	getMeta: ->
-		throw new Error 'Cache storage: getMeta method is not implemented'
+		if @meta == null then @getData()
+		return @meta
 
 
 	invalidate: ->
