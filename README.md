@@ -24,6 +24,8 @@ more than one independent caches.
 * FileStorage (cache-storage/Storage/FileStorage - saving data to json files)
 * BrowserLocalStorage (cache-storage/Storage/BrowserLocalStorage - saving data to HTML5 local storage)
 
+More storages will be added in future.
+
 ## Loading & saving
 
 ```
