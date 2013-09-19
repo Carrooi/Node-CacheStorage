@@ -19,6 +19,7 @@
 			"run": [
 				"test/browser/Cache",
 				"test/browser/BrowserLocalStorage",
+				"test/browser/FileStorage",
 				"test/browser/DevNullStorage"
 			]
 		}

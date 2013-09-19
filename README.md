@@ -134,6 +134,7 @@ $ npm test
 
 * 1.3.0
 	+ Added DevNullStorage
+	+ FileStorage throws an error on browser
 
 * 1.2.4
 	+ Rewritten tests

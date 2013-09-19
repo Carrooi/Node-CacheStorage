@@ -377,13 +377,13 @@ var process = {cwd: function() {return '/';}, argv: ['node', 'src/Storage/FileSt
     __hasProp = {}.hasOwnProperty,
     __extends = function(child, parent) { for (var key in parent) { if (__hasProp.call(parent, key)) child[key] = parent[key]; } function ctor() { this.constructor = child; } ctor.prototype = parent.prototype; child.prototype = new ctor(); child.__super__ = parent.prototype; return child; };
 
-  fs = require('fs');
-
-  path = require('path');
-
   Storage = require('./Storage');
 
   Cache = require('../Cache');
+
+  fs = null;
+
+  path = null;
 
   FileStorage = (function(_super) {
 
@@ -393,6 +393,11 @@ var process = {cwd: function() {return '/';}, argv: ['node', 'src/Storage/FileSt
 
     function FileStorage(directory) {
       this.directory = directory;
+      if (typeof window !== 'undefined') {
+        throw new Error('FileStorage: Can not use this storage in browser');
+      }
+      fs = require('fs');
+      path = require('path');
       this.directory = path.resolve(this.directory);
       if (!fs.existsSync(this.directory)) {
         throw new Error('FileStorage: directory ' + this.directory + ' does not exists');
@@ -873,6 +878,29 @@ var process = {cwd: function() {return '/';}, argv: ['node', 'test/browser/DevNu
         });
         expect(val).to.be["true"];
         return expect(cache.load('true')).to.be["null"];
+      });
+    });
+  });
+
+}).call(this);
+
+},
+'test/browser/FileStorage.coffee': function(exports, __require, module) {
+var require = function(name) {return __require(name, 'test/browser/FileStorage.coffee');};
+var __filename = 'test/browser/FileStorage.coffee';
+var __dirname = 'test/browser';
+var process = {cwd: function() {return '/';}, argv: ['node', 'test/browser/FileStorage.coffee'], env: {}};
+(function() {
+  var FileStorage;
+
+  FileStorage = require('cache-storage/Storage/FileStorage');
+
+  describe('FileStorage', function() {
+    return describe('#constructor()', function() {
+      return it('should throw an error on browser', function() {
+        return expect(function() {
+          return new FileStorage;
+        }).to["throw"](Error);
       });
     });
   });
@@ -2745,5 +2773,7 @@ require._setMeta({"cache-storage":{"base":"","path":"lib/Cache.js"},"moment":{"b
 require('test/browser/Cache');
 
 require('test/browser/BrowserLocalStorage');
+
+require('test/browser/FileStorage');
 
 require('test/browser/DevNullStorage');

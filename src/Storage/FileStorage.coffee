@@ -1,7 +1,8 @@
-fs = require 'fs'
-path = require 'path'
 Storage = require './Storage'
 Cache = require '../Cache'
+
+fs = null
+path = null
 
 class FileStorage extends Storage
 
@@ -10,6 +11,12 @@ class FileStorage extends Storage
 
 
 	constructor: (@directory) ->
+		if typeof window != 'undefined'
+			throw new Error 'FileStorage: Can not use this storage in browser'
+
+		fs = require 'fs'
+		path = require 'path'
+
 		@directory = path.resolve(@directory)
 		if !fs.existsSync(@directory)
 			throw new Error 'FileStorage: directory ' + @directory + ' does not exists'
