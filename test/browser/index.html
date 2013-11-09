@@ -5,14 +5,18 @@
 	</head>
 	<body>
 		<div id="mocha"></div>
+
 		<script src="../../node_modules/mocha/mocha.js"></script>
 		<script src="../../node_modules/chai/chai.js"></script>
+
 		<script>
 			mocha.ui('bdd');
 			mocha.reporter('html');
 			var expect = chai.expect;
 		</script>
-		<script src="tests.js"></script>
+
+		<script src="application.js"></script>
+
 		<script>
 			if (window.mochaPhantomJS) { mochaPhantomJS.run(); }
 			else { mocha.run(); }

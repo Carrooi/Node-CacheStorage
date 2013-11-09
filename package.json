@@ -29,6 +29,6 @@
 		"chai": "latest"
 	},
 	"scripts": {
-		"test": "cd ./test; echo \"Testing in node:\"; mocha ./node/index.js --reporter spec; echo \"Testing in browser:\"; mocha-phantomjs ./browser/index.html;"
+		"test": "cd ./test; echo \"Testing in node:\"; mocha ./node/index.js --reporter spec; cd ./browser; echo \"Testing in browser:\"; simq build; mocha-phantomjs ./index.html;"
 	}
 }

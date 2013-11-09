@@ -2,31 +2,26 @@
 	"packages": {
 		"tests": {
 			"base": "../../",
-			"application": "./test/browser/tests.js",
+			"application": "./test/browser/application.js",
 			"modules": [
-				"./src/*.coffee",
-				"./test/browser/*.coffee",
-				"./node_modules/moment/moment.js",
-				"./node_modules/moment/lang/en-gb.js"
+				"./lib/*.js",
+				"./test/browser/tests/*.coffee"
 			],
 			"aliases": {
-				"cache-storage": "src/Cache",
-				"cache-storage/Storage/BrowserLocalStorage": "src/Storage/BrowserLocalStorage",
-				"cache-storage/Storage/DevNullStorage": "src/Storage/DevNullStorage",
-				"cache-storage/Storage/FileStorage": "src/Storage/FileStorage",
-				"cache-storage/Storage/MemoryStorage": "src/Storage/MemoryStorage",
-				"cache-storage/Storage/Storage": "src/Storage/Storage"
+				"cache-storage": "/lib/Cache",
+				"cache-storage/Storage/BrowserLocalStorage": "/lib/Storage/BrowserLocalStorage",
+				"cache-storage/Storage/DevNullStorage": "/lib/Storage/DevNullStorage",
+				"cache-storage/Storage/FileStorage": "/lib/Storage/FileStorage",
+				"cache-storage/Storage/MemoryStorage": "/lib/Storage/MemoryStorage",
+				"cache-storage/Storage/Storage": "/lib/Storage/Storage"
 			},
 			"run": [
-				"test/browser/Cache",
-				"test/browser/BrowserLocalStorage",
-				"test/browser/FileStorage",
-				"test/browser/DevNullStorage",
-				"test/browser/MemoryStorage"
+				"/test/browser/tests/Cache",
+				"/test/browser/tests/BrowserLocalStorage",
+				"/test/browser/tests/FileStorage",
+				"/test/browser/tests/DevNullStorage",
+				"/test/browser/tests/MemoryStorage"
 			]
 		}
-	},
-	"debugger": {
-		"scripts": true
 	}
 }
