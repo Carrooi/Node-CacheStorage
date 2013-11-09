@@ -1,7 +1,7 @@
 {
 	"name": "cache-storage",
 	"description": "Advanced cache storage for node js",
-	"version": "1.3.0",
+	"version": "1.4.0",
 	"author": {
 		"name": "David Kudera",
 		"email": "sakren@gmail.com"

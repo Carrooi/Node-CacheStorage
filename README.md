@@ -146,6 +146,9 @@ $ npm test
 
 ## Changelog
 
+* 1.4.0
+	+ Bug with tests
+
 * 1.3.0
 	+ Added DevNullStorage
 	+ Added MemoryStorage
