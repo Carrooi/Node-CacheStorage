@@ -92,7 +92,8 @@ cache.save('some_data', 'some value of some_data', {
 
 If you set files to save function, then that item will expire when some of given files is changed.
 
-This type of expiration is not available on browser.
+This type of expiration can be used also in browser, but only with [simq](https://npmjs.org/package/simq) and with allowed
+option `filesStats`. See at documentation of [simq](https://npmjs.org/package/simq).
 
 ### Expiration by tags
 
@@ -148,6 +149,7 @@ $ npm test
 
 * 1.4.0
 	+ Bug with tests
+	+ Added support for invalidating cache in browser by files (only with [simq](https://npmjs.org/package/simq))
 
 * 1.3.0
 	+ Added DevNullStorage

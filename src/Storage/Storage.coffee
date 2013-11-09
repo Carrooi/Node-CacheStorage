@@ -7,6 +7,15 @@ if !isWindow
 moment = require 'moment'
 Cache = require '../Cache'
 
+checkFilesSupport = ->
+	if isWindow && window.require.simq != true
+		throw new Error 'Files meta information can be used in browser only with simq.'
+
+	if isWindow
+		version = window.require.version
+		if typeof version == 'undefined' || parseInt(version.replace(/\./g, '')) < 510
+			throw new Error 'File method information is supported only with simq@5.1.0 and later.'
+
 class Storage
 
 
@@ -97,10 +106,17 @@ class Storage
 
 		if typefn.call(meta) == '[object Object]'
 			if typeof meta[Cache.FILES] != 'undefined'
-				if isWindow then throw new Error 'Files meta information is not supported in browser'
+				checkFilesSupport()
+				if isWindow
+					for file, time of meta[Cache.FILES]
+						mtime = window.require.getStats(file).mtime
+						if mtime == null
+							throw new Error 'File stats are disabled in your simq configuration. Can not get stats for ' + file + '.'
 
-				for file, time of meta[Cache.FILES]
-					if (new Date(fs.statSync(file).mtime)).getTime() != time then return false
+						if window.require.getStats(file).mtime.getTime() != time then return false
+				else
+					for file, time of meta[Cache.FILES]
+						if (new Date(fs.statSync(file).mtime)).getTime() != time then return false
 
 			if typeof meta[Cache.EXPIRE] != 'undefined'
 				if moment().valueOf() >= meta[Cache.EXPIRE] then return false
@@ -119,12 +135,19 @@ class Storage
 
 		if typefn.call(dependencies) == '[object Object]'
 			if typeof dependencies[Cache.FILES] != 'undefined'
-				if isWindow then throw new Error 'Files meta information is not supported in browser'
-
+				checkFilesSupport()
 				files = {}
-				for file in dependencies[Cache.FILES]
-					file = path.resolve(file)
-					files[file] = (new Date(fs.statSync(file).mtime)).getTime()
+				if isWindow
+					for file in dependencies[Cache.FILES]
+						mtime = window.require.getStats(file).mtime
+						if mtime == null
+							throw new Error 'File stats are disabled in your simq configuration. Can not get stats for ' + file + '.'
+						file = window.require.resolve(file)
+						files[file] = mtime.getTime()
+				else
+					for file in dependencies[Cache.FILES]
+						file = path.resolve(file)
+						files[file] = (new Date(fs.statSync(file).mtime)).getTime()
 				result[Cache.FILES] = files
 
 			if typeof dependencies[Cache.EXPIRE] != 'undefined'
