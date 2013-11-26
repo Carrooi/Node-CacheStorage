@@ -28,7 +28,7 @@
           parent: null,
           children: null
         };
-        modules[fullName].apply(modules[fullName], [m.exports, m]);
+        modules[fullName].apply(window, [m.exports, m]);
         m.loaded = true;
         cache[fullName] = m;
       }
@@ -2803,15 +2803,15 @@
 	    }
 	
 	    Cache.prototype.generateKey = function(key) {
-	      var char, hash, i, max, _i;
+	      var ch, hash, i, max, _i;
 	      hash = 0;
 	      if (key.length === 0) {
 	        return hash;
 	      }
 	      max = key.length - 1;
 	      for (i = _i = 0; 0 <= max ? _i <= max : _i >= max; i = 0 <= max ? ++_i : --_i) {
-	        char = key.charCodeAt(i);
-	        hash = ((hash << 5) - hash) + char;
+	        ch = key.charCodeAt(i);
+	        hash = ((hash << 5) - hash) + ch;
 	        hash |= 0;
 	      }
 	      return hash;
@@ -3602,7 +3602,7 @@
 	return {
 		"name": "cache-storage",
 		"description": "Advanced cache storage for node js",
-		"version": "1.4.0",
+		"version": "1.4.1",
 		"author": {
 			"name": "David Kudera",
 			"email": "sakren@gmail.com"
@@ -3742,8 +3742,8 @@
 , 'moment': function(exports, module) { module.exports = window.require('moment/moment.js'); }
 
 });
-require.__setStats({"/lib/Storage/Storage.js":{"atime":1384005767000,"mtime":1384005765000,"ctime":1384005765000},"moment/moment.js":{"atime":1383999762000,"mtime":1382840735000,"ctime":1383999753000},"/lib/Cache.js":{"atime":1384001500000,"mtime":1384001497000,"ctime":1384001497000},"/lib/Storage/BrowserLocalStorage.js":{"atime":1384001500000,"mtime":1384001497000,"ctime":1384001497000},"/lib/Storage/DevNullStorage.js":{"atime":1384001500000,"mtime":1384001497000,"ctime":1384001497000},"/lib/Storage/FileStorage.js":{"atime":1384001500000,"mtime":1384001497000,"ctime":1384001497000},"/lib/Storage/MemoryStorage.js":{"atime":1384001500000,"mtime":1384001497000,"ctime":1384001497000},"/test/browser/tests/BrowserLocalStorage.coffee":{"atime":1384025488000,"mtime":1384025482000,"ctime":1384025482000},"/test/browser/tests/Cache.coffee":{"atime":1383999970000,"mtime":1383999743000,"ctime":1383999970000},"/test/browser/tests/DevNullStorage.coffee":{"atime":1383999975000,"mtime":1383999743000,"ctime":1383999975000},"/test/browser/tests/FileStorage.coffee":{"atime":1383999977000,"mtime":1383999743000,"ctime":1383999977000},"/test/browser/tests/MemoryStorage.coffee":{"atime":1383999980000,"mtime":1383999743000,"ctime":1383999980000},"/package.json":{"atime":1384000090000,"mtime":1384000087000,"ctime":1384000087000},"moment/package.json":{"atime":1383999762000,"mtime":1383999754000,"ctime":1383999754000}});
-require.version = '5.1.2';
+require.__setStats({"/lib/Storage/Storage.js":{"atime":1385454523000,"mtime":1385454510000,"ctime":1385454510000},"moment/moment.js":{"atime":1385454450000,"mtime":1382840735000,"ctime":1385454393000},"/lib/Cache.js":{"atime":1385454559000,"mtime":1385454550000,"ctime":1385454550000},"/lib/Storage/BrowserLocalStorage.js":{"atime":1385454523000,"mtime":1385454510000,"ctime":1385454510000},"/lib/Storage/DevNullStorage.js":{"atime":1385454523000,"mtime":1385454510000,"ctime":1385454510000},"/lib/Storage/FileStorage.js":{"atime":1385454523000,"mtime":1385454510000,"ctime":1385454510000},"/lib/Storage/MemoryStorage.js":{"atime":1385454523000,"mtime":1385454510000,"ctime":1385454510000},"/test/browser/tests/BrowserLocalStorage.coffee":{"atime":1385454472000,"mtime":1385454380000,"ctime":1385454380000},"/test/browser/tests/Cache.coffee":{"atime":1385454472000,"mtime":1385454380000,"ctime":1385454380000},"/test/browser/tests/DevNullStorage.coffee":{"atime":1385454472000,"mtime":1385454380000,"ctime":1385454380000},"/test/browser/tests/FileStorage.coffee":{"atime":1385454472000,"mtime":1385454380000,"ctime":1385454380000},"/test/browser/tests/MemoryStorage.coffee":{"atime":1385454472000,"mtime":1385454380000,"ctime":1385454380000},"/package.json":{"atime":1385454782000,"mtime":1385454532000,"ctime":1385454532000},"moment/package.json":{"atime":1385454450000,"mtime":1385454394000,"ctime":1385454394000}});
+require.version = '5.1.3';
 
 /** run section **/
 
