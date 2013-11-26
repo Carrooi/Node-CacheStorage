@@ -32,8 +32,8 @@ class Cache
 		if key.length == 0 then return hash
 		max = key.length - 1
 		for i in [0..max]
-			char = key.charCodeAt(i)
-			hash = ((hash << 5) - hash) + char
+			ch = key.charCodeAt(i)
+			hash = ((hash << 5) - hash) + ch
 			hash |= 0
 
 		return hash

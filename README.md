@@ -147,6 +147,9 @@ $ npm test
 
 ## Changelog
 
+* 1.4.1
+	+ Can not use some js reserved words
+
 * 1.4.0
 	+ Bug with tests
 	+ Added support for invalidating cache in browser by files (only with [simq](https://npmjs.org/package/simq))
