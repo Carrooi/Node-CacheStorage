@@ -22,13 +22,19 @@
 	},
 	"main": "./lib/Cache.js",
 	"dependencies": {
-		"moment": "latest"
+		"moment": "~2.5.0"
 	},
 	"devDependencies": {
-		"mocha": "latest",
-		"chai": "latest"
+		"chai": "~1.8.1",
+		"mocha": "~1.17.0",
+		"mocha-phantomjs": "~3.3.1",
+		"phantomjs": "1.9.2-6"
 	},
 	"scripts": {
-		"test": "cd ./test; echo \"Testing in node:\"; mocha ./node/index.js --reporter spec; cd ./browser; echo \"Testing in browser:\"; mocha-phantomjs ./index.html;"
+		"test": "npm run test-node && npm run test-browser",
+		"build-and-test": "npm run test-build && npm run test",
+		"test-build": "cd ./test/browser; simq build;",
+		"test-node": "mocha ./test/node/index.js --reporter spec",
+		"test-browser": "mocha-phantomjs ./test/browser/index.html"
 	}
 }
