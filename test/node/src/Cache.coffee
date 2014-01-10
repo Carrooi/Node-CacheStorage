@@ -1,6 +1,6 @@
 expect = require('chai').expect
 
-Cache = require '../../lib/Cache'
+Cache = require '../../../lib/Cache'
 
 describe 'Cache', ->
 
