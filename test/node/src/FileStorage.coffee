@@ -1,32 +1,41 @@
 expect = require('chai').expect
 path = require 'path'
-fs = require 'fs'
 
 Cache = require '../../../lib/Cache'
 FileStorage = require '../../../lib/Storage/FileStorage'
 
-file = path.normalize(__dirname + '/../../data/file')
-dir = path.normalize(__dirname + '/../../data/temp')
+fs = null
 cache = null
 
 describe 'FileStorage', ->
+
+	beforeEach( ->
+		fs = Cache.mockFs(
+			'temp': {}
+			'file': ''
+		)
+	)
+
+	afterEach( ->
+		Cache.restoreFs()
+	)
 
 	describe '#constructor()', ->
 		it 'should throw an error if path does not exists', ->
 			expect( -> new FileStorage('./unknown/path') ).to.throw()
 
 		it 'should throw an error if path is not directory', ->
-			expect( -> new FileStorage(file) ).to.throw()
+			expect( -> new FileStorage('/file') ).to.throw()
 
 	describe 'saving/loading', ->
 
 		beforeEach( ->
-			cache = new Cache(new FileStorage(dir), 'test')
+			cache = new Cache(new FileStorage('/temp'), 'test')
 		)
 
 		afterEach( ->
-			if fs.existsSync(dir + '/__test.json')
-				fs.unlinkSync(dir + '/__test.json')
+			if fs.existsSync('/temp/__test.json')
+				fs.unlinkSync('/temp/__test.json')
 		)
 
 		it 'should save true and load it', ->
@@ -48,18 +57,21 @@ describe 'FileStorage', ->
 	describe 'expiration', ->
 
 		beforeEach( ->
-			cache = new Cache(new FileStorage(dir), 'test')
+			cache = new Cache(new FileStorage('/temp'), 'test')
 		)
 
 		afterEach( ->
-			if fs.existsSync(dir + '/__test.json')
-				fs.unlinkSync(dir + '/__test.json')
+			if fs.existsSync('/temp/__test.json')
+				fs.unlinkSync('/temp/__test.json')
 		)
 
-		it 'should expire "true" value after file is changed', ->
-			cache.save 'true', true, {files: [file]}
-			fs.writeFileSync(file, '')
-			expect(cache.load 'true').to.be.null
+		it 'should expire "true" value after file is changed', (done) ->
+			cache.save 'true', true, {files: ['/file']}
+			setTimeout( ->
+				fs.writeFileSync('/file', '')
+				expect(cache.load 'true').to.be.null
+				done()
+			, 100)
 
 		it 'should remove all items with tag "article"', ->
 			cache.save 'one', 'one', {tags: ['article']}

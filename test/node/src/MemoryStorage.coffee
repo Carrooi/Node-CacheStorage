@@ -1,17 +1,25 @@
 expect = require('chai').expect
 path = require 'path'
-fs = require 'fs'
+
+fs = null
 
 Cache = require '../../../lib/Cache'
 MemoryStorage = require '../../../lib/Storage/MemoryStorage'
 
-file = path.normalize(__dirname + '/../../data/file')
 cache = null
 
 describe 'MemoryStorage', ->
 
 	beforeEach( ->
+		fs = Cache.mockFs(
+			'temp': {}
+			'file': ''
+		)
 		cache = new Cache(new MemoryStorage, 'test')
+	)
+
+	afterEach( ->
+		Cache.restoreFs()
 	)
 
 	describe 'saving/loading', ->
@@ -34,10 +42,14 @@ describe 'MemoryStorage', ->
 
 	describe 'expiration', ->
 
-		it 'should expire "true" value after file is changed', ->
-			cache.save 'true', true, {files: [file]}
-			fs.writeFileSync(file, '')
-			expect(cache.load 'true').to.be.null
+		it 'should expire "true" value after file is changed', (done) ->
+			cache.save 'true', true, {files: ['/file']}
+			setTimeout( ->
+				fs.writeFileSync('/file', '')
+				expect(cache.load 'true').to.be.null
+				done()
+			, 100)
+
 
 		it 'should remove all items with tag "article"', ->
 			cache.save 'one', 'one', {tags: ['article']}
