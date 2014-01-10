@@ -10,6 +10,8 @@ Can be also used in browser for example with [simq](https://npmjs.org/package/si
 $ npm install cache-storage
 ```
 
+Required node version: >= 0.9
+
 ## Creating cache
 
 ```
