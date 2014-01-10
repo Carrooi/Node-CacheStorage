@@ -1,7 +1,7 @@
 expect = require('chai').expect
 
-Cache = require '../../lib/Cache'
-DevNullStorage = require '../../lib/Storage/DevNullStorage'
+Cache = require '../../../lib/Cache'
+DevNullStorage = require '../../../lib/Storage/DevNullStorage'
 
 cache = null
 

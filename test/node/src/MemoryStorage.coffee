@@ -2,10 +2,10 @@ expect = require('chai').expect
 path = require 'path'
 fs = require 'fs'
 
-Cache = require '../../lib/Cache'
-MemoryStorage = require '../../lib/Storage/MemoryStorage'
+Cache = require '../../../lib/Cache'
+MemoryStorage = require '../../../lib/Storage/MemoryStorage'
 
-file = path.normalize(__dirname + '/../data/file')
+file = path.normalize(__dirname + '/../../data/file')
 cache = null
 
 describe 'MemoryStorage', ->
