@@ -15,6 +15,8 @@ class Cache
 
 	@TIME_FORMAT = 'YYYY-MM-DD HH:mm'
 
+	@fs: null
+
 	storage: null
 
 	namespace: null
@@ -25,6 +27,26 @@ class Cache
 			throw new Error 'Cache: storage must be instance of cache-storage/Storage/Storage'
 
 		@storage.cache = @
+
+
+	@mockFs: (tree = {}, info = {}) ->
+		FS = require 'fs-mock'
+		Cache.fs = new FS(tree, info)
+		return Cache.fs
+
+
+	@restoreFs: ->
+		if typeof window != 'undefined'
+			throw new Error 'Testing with fs module is not allowed in browser.'
+
+		Cache.fs = require 'fs'
+
+
+	@getFs: ->
+		if Cache.fs == null
+			Cache.restoreFs()
+
+		return Cache.fs
 
 
 	generateKey: (key) ->

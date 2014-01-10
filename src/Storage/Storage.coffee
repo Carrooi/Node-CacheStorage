@@ -1,7 +1,6 @@
 isWindow = if typeof window == 'undefined' then false else true
 
 if !isWindow
-	fs = require 'fs'
 	path = require 'path'
 
 moment = require 'moment'
@@ -116,7 +115,7 @@ class Storage
 						if window.require.getStats(file).mtime.getTime() != time then return false
 				else
 					for file, time of meta[Cache.FILES]
-						if (new Date(fs.statSync(file).mtime)).getTime() != time then return false
+						if (new Date(Cache.getFs().statSync(file).mtime)).getTime() != time then return false
 
 			if typeof meta[Cache.EXPIRE] != 'undefined'
 				if moment().valueOf() >= meta[Cache.EXPIRE] then return false
@@ -147,7 +146,7 @@ class Storage
 				else
 					for file in dependencies[Cache.FILES]
 						file = path.resolve(file)
-						files[file] = (new Date(fs.statSync(file).mtime)).getTime()
+						files[file] = (new Date(Cache.getFs().statSync(file).mtime)).getTime()
 				result[Cache.FILES] = files
 
 			if typeof dependencies[Cache.EXPIRE] != 'undefined'

@@ -24,9 +24,9 @@ class FileStorage extends Storage
 		path = require 'path'
 
 		@directory = path.resolve(@directory)
-		if !fs.existsSync(@directory)
+		if !Cache.getFs().existsSync(@directory)
 			throw new Error 'FileStorage: directory ' + @directory + ' does not exists'
-		if !fs.statSync(@directory).isDirectory()
+		if !Cache.getFs().statSync(@directory).isDirectory()
 			throw new Error 'FileStorage: path ' + @directory + ' must be directory'
 
 
@@ -37,8 +37,8 @@ class FileStorage extends Storage
 	loadData: ->
 		if @allData == null
 			file = @getFileName()
-			if fs.existsSync(file)
-				@allData = JSON.parse(fs.readFileSync(file, encoding: 'utf8'))
+			if Cache.getFs().existsSync(file)
+				@allData = JSON.parse(Cache.getFs().readFileSync(file, encoding: 'utf8'))
 			else
 				@allData = {data: {}, meta: {}}
 
@@ -61,7 +61,7 @@ class FileStorage extends Storage
 
 	writeData: (@data, @meta) ->
 		file = @getFileName()
-		fs.writeFileSync(file, JSON.stringify(
+		Cache.getFs().writeFileSync(file, JSON.stringify(
 			data: @data
 			meta: @meta
 		))
