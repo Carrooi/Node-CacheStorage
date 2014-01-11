@@ -28,35 +28,73 @@ class Storage
 			throw new Error 'Cache storage: you have to implement methods getData, getMeta and writeData.'
 
 
-	read: (key) ->
-		data = @getData()
-		if typeof data[key] == 'undefined'
-			return null
+	read: (key, fn = null) ->
+		if @async
+			@getData( (data) =>
+				if typeof data[key] == 'undefined'
+					fn(null)
+				else
+					@findMeta(key, (meta) =>
+						if @verify(meta[key])
+							fn(data[key])
+						else
+							@remove(key, ->
+								fn()
+							)
+					)
+			)
 		else
-			if @verify(@findMeta(key))
-				return data[key]
-			else
-				@remove(key)
+			data = @getData()
+			if typeof data[key] == 'undefined'
 				return null
+			else
+				if @verify(@findMeta(key))
+					return data[key]
+				else
+					@remove(key)
+					return null
 
 
-	write: (key, data, dependencies = {}) ->
-		all = @getData()
-		all[key] = data
-		meta = @getMeta()
-		meta[key] = dependencies
-		@writeData(all, meta)
-		return @
+	write: (key, data, dependencies = {}, fn = null) ->
+		if @async
+			@getData( (all) =>
+				all[key] = data
+				@getMeta( (meta) =>
+					meta[key] = dependencies
+					@writeData(all, meta, ->
+						fn()
+					)
+				)
+			)
+		else
+			all = @getData()
+			all[key] = data
+			meta = @getMeta()
+			meta[key] = dependencies
+			@writeData(all, meta)
+			return @
 
 
-	remove: (key) ->
-		data = @getData()
-		meta = @getMeta()
-		if typeof data[key] != 'undefined'
-			delete data[key]
-			delete meta[key]
-		@writeData(data, meta)
-		return @
+	remove: (key, fn = null) ->
+		if @async
+			@getData( (data) =>
+				@getMeta( (meta) =>
+					if typeof data[key] != 'undefined'
+						delete data[key]
+						delete meta[key]
+					@writeData(data, meta, ->
+						fn()
+					)
+				)
+			)
+		else
+			data = @getData()
+			meta = @getMeta()
+			if typeof data[key] != 'undefined'
+				delete data[key]
+				delete meta[key]
+			@writeData(data, meta)
+			return @
 
 
 	clean: (conditions) ->
@@ -79,27 +117,53 @@ class Storage
 		return @
 
 
-	findMeta: (key) ->
-		meta = @getMeta()
-		return if typeof meta[key] != 'undefined' then meta[key] else null
+	findMeta: (key, fn = null) ->
+		if @async
+			@getMeta( (meta) ->
+				if typeof meta[key] != 'undefined'
+					fn(meta[key])
+				else
+					fn(null)
+			)
+		else
+			meta = @getMeta()
+			return if typeof meta[key] != 'undefined' then meta[key] else null
 
 
-	findKeysByTag: (tag) ->
-		metas = @getMeta()
-		result = []
-		for key, meta of metas
-			if typeof meta[Cache.TAGS] != 'undefined' && meta[Cache.TAGS].indexOf(tag) != -1
-				result.push(key)
-		return result
+	findKeysByTag: (tag, fn = null) ->
+		if @async
+			@getMeta( (metas) ->
+				result = []
+				for key, meta of metas
+					if typeof meta[Cache.TAGS] != 'undefined' && meta[Cache.TAGS].indexOf(tag) != -1
+						result.push(key)
+				fn(result)
+			)
+		else
+			metas = @getMeta()
+			result = []
+			for key, meta of metas
+				if typeof meta[Cache.TAGS] != 'undefined' && meta[Cache.TAGS].indexOf(tag) != -1
+					result.push(key)
+			return result
 
 
-	findKeysByPriority: (priority) ->
-		metas = @getMeta()
-		result = []
-		for key, meta of metas
-			if typeof meta[Cache.PRIORITY] != 'undefined' && meta[Cache.PRIORITY] <= priority
-				result.push(key)
-		return result
+	findKeysByPriority: (priority, fn = null) ->
+		if @async
+			@getMeta( (metas) ->
+				result = []
+				for key, meta of metas
+					if typeof meta[Cache.PRIORITY] != 'undefined' && meta[Cache.PRIORITY] <= priority
+						result.push(key)
+				fn(result)
+			)
+		else
+			metas = @getMeta()
+			result = []
+			for key, meta of metas
+				if typeof meta[Cache.PRIORITY] != 'undefined' && meta[Cache.PRIORITY] <= priority
+					result.push(key)
+			return result
 
 
 	verify: (meta) ->
@@ -123,6 +187,9 @@ class Storage
 				if moment().valueOf() >= meta[Cache.EXPIRE] then return false
 
 			if typeof meta[Cache.ITEMS] != 'undefined'
+				if @async
+					throw new Error 'Expiration by items is currently not supported in async storages.'
+
 				for item in meta[Cache.ITEMS]
 					item = @findMeta(item)
 					if (item == null) || (item != null && @verify(item) == false) then return false
