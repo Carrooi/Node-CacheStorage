@@ -7,6 +7,8 @@ class BrowserLocalStorage extends Storage
 	@TEST_VALUE = '__--cache-storage--__'
 
 
+	async: false
+
 	allData: null
 
 	data: null

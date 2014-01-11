@@ -3,6 +3,8 @@ Storage = require './Storage'
 class MemoryStorage extends Storage
 
 
+	async: false
+
 	data: null
 
 	meta: null

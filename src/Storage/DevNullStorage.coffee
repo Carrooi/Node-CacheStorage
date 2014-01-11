@@ -3,6 +3,9 @@ Storage = require './Storage'
 class DevNullStorage extends Storage
 
 
+	async: false
+
+
 	getData: ->
 		return {}
 
