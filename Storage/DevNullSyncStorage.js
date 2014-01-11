@@ -1,1 +1,1 @@
-module.exports = require('../lib/Storage/DevNullSyncStorage');
+module.exports = require('../lib/Storage/Sync/DevNullStorage');

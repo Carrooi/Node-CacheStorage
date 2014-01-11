@@ -1,19 +1,25 @@
+expect = require('chai').expect
+path = require 'path'
 
-Cache = require 'cache-storage'
-BrowserLocalStorage = require 'cache-storage/Storage/BrowserLocalStorage'
+fs = null
+
+Cache = require '../../../../../lib/Cache'
+MemoryStorage = require '../../../../../Storage/MemoryStorage'
 
 cache = null
 
-originalSimqVersion = window.require.version
-
-describe 'BrowserLocalStorage', ->
+describe 'MemoryStorage', ->
 
 	beforeEach( ->
-		cache = new Cache(new BrowserLocalStorage)
+		fs = Cache.mockFs(
+			'temp': {}
+			'file': ''
+		)
+		cache = new Cache(new MemoryStorage, 'test')
 	)
 
 	afterEach( ->
-		localStorage.clear()
+		Cache.restoreFs()
 	)
 
 	describe 'saving/loading', ->
@@ -35,6 +41,15 @@ describe 'BrowserLocalStorage', ->
 			expect(val).to.be.true
 
 	describe 'expiration', ->
+
+		it 'should expire "true" value after file is changed', (done) ->
+			cache.save 'true', true, {files: ['/file']}
+			setTimeout( ->
+				fs.writeFileSync('/file', '')
+				expect(cache.load 'true').to.be.null
+				done()
+			, 100)
+
 
 		it 'should remove all items with tag "article"', ->
 			cache.save 'one', 'one', {tags: ['article']}
@@ -71,37 +86,3 @@ describe 'BrowserLocalStorage', ->
 			cache.clean 'all'
 			expect(cache.load 'one').to.be.null
 			expect(cache.load 'two').to.be.null
-
-		describe 'files', ->
-
-			afterEach( ->
-				window.require.simq = true
-				window.require.version = originalSimqVersion
-			)
-
-			it 'should throw an error for environments other than simq', ->
-				delete window.require.simq
-				expect( -> cache.save 'true', true, {files: []}).to.throw(Error, 'Files meta information can be used in browser only with simq.')
-
-			it 'should throw an error if simq is old', ->
-				window.require.version = '5.0.4'
-				expect( -> cache.save 'true', true, {files: []}).to.throw(Error, 'File method information is supported only with simq@5.1.0 and later.')
-
-			it 'should throw an error if simq is really very old', ->
-				delete window.require.version
-				expect( -> cache.save 'true', true, {files: []}).to.throw(Error, 'File method information is supported only with simq@5.1.0 and later.')
-
-			it 'should expire data after file is changed', ->
-				file = '/test/browser/tests/BrowserLocalStorage'
-				cache.save 'true', true, {files: [file]}
-				stats = window.require.getStats(file)
-				oldStats = {}
-				oldStats[file] = stats
-				newStats = {}
-				newStats[window.require.resolve(file)] =
-					atime: stats.atime.getTime()
-					mtime: (new Date(stats.mtime.getTime())).setHours(stats.mtime.getHours() + 1)
-					ctime: stats.ctime.getTime()
-				window.require.__setStats(newStats)
-				expect(cache.load 'true').to.be.null
-				window.require.__setStats(oldStats)

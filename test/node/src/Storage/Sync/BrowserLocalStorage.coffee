@@ -1,7 +1,7 @@
 expect = require('chai').expect
 
-Cache = require '../../../lib/Cache'
-BrowserLocalStorage = require '../../../lib/Storage/BrowserLocalStorage'
+Cache = require '../../../../../lib/Cache'
+BrowserLocalStorage = require '../../../../../Storage/BrowserLocalStorage'
 
 describe 'BrowserLocalStorage', ->
 

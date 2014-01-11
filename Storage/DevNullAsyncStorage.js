@@ -1,1 +1,1 @@
-module.exports = require('../lib/Storage/DevNullAsyncStorage');
+module.exports = require('../lib/Storage/Async/DevNullStorage');

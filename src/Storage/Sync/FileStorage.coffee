@@ -1,5 +1,5 @@
 Storage = require './Storage'
-Cache = require '../Cache'
+Cache = require '../../Cache'
 
 fs = null
 path = null

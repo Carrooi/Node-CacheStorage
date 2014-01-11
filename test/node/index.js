@@ -1,6 +1,6 @@
 require('./lib/Cache');
-require('./lib/FileStorage');
-require('./lib/BrowserLocalStorage');
-require('./lib/DevNullSyncStorage');
-require('./lib/DevNullAsyncStorage');
-require('./lib/MemoryStorage');
+require('./lib/Storage/Sync/FileStorage');
+require('./lib/Storage/Sync/BrowserLocalStorage');
+require('./lib/Storage/Sync/DevNullStorage');
+require('./lib/Storage/Async/DevNullStorage');
+require('./lib/Storage/Sync/MemoryStorage');

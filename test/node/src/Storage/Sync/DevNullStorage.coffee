@@ -1,7 +1,7 @@
 expect = require('chai').expect
 
-Cache = require '../../../lib/Cache'
-DevNullSyncStorage = require '../../../Storage/DevNullSyncStorage'
+Cache = require '../../../../../lib/Cache'
+DevNullStorage = require '../../../../../Storage/DevNullSyncStorage'
 
 cache = null
 
@@ -10,7 +10,7 @@ describe 'DevNullSyncStorage', ->
 	describe 'saving/loading', ->
 
 		beforeEach( ->
-			cache = new Cache(new DevNullSyncStorage, 'test')
+			cache = new Cache(new DevNullStorage, 'test')
 		)
 
 		it 'should not save true', ->

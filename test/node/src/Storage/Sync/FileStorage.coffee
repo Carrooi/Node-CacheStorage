@@ -1,8 +1,8 @@
 expect = require('chai').expect
 path = require 'path'
 
-Cache = require '../../../lib/Cache'
-FileStorage = require '../../../lib/Storage/FileStorage'
+Cache = require '../../../../../lib/Cache'
+FileStorage = require '../../../../../Storage/FileStorage'
 
 fs = null
 cache = null

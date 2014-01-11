@@ -1,1 +1,1 @@
-module.exports = require('../lib/Storage/MemoryStorage');
+module.exports = require('../lib/Storage/Sync/MemoryStorage');

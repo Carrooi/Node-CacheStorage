@@ -1,13 +1,13 @@
 
 Cache = require 'cache-storage'
-DevNullSyncStorage = require 'cache-storage/Storage/DevNullSyncStorage'
+DevNullStorage = require 'cache-storage/Storage/DevNullSyncStorage'
 
 cache = null
 
 describe 'DevNullSyncStorage', ->
 
 	beforeEach( ->
-		cache = new Cache(new DevNullSyncStorage)
+		cache = new Cache(new DevNullStorage)
 	)
 
 	describe 'saving/loading', ->

@@ -4,9 +4,9 @@
 
   expect = require('chai').expect;
 
-  Cache = require('../../../lib/Cache');
+  Cache = require('../../../../../lib/Cache');
 
-  BrowserLocalStorage = require('../../../lib/Storage/BrowserLocalStorage');
+  BrowserLocalStorage = require('../../../../../Storage/BrowserLocalStorage');
 
   describe('BrowserLocalStorage', function() {
     return describe('#constructor()', function() {
