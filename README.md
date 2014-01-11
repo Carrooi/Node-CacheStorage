@@ -1,3 +1,7 @@
+[![NPM version](https://badge.fury.io/js/cache-storage.png)](http://badge.fury.io/js/cache-storage)
+[![Dependency Status](https://gemnasium.com/sakren/node-cache-storage.png)](https://gemnasium.com/sakren/node-cache-storage)
+[![Build Status](https://travis-ci.org/sakren/node-cache-storage.png?branch=master)](https://travis-ci.org/sakren/node-cache-storage)
+
 # cache-storage
 
 Advanced cache storage inspired by cache in [Nette framework](http://doc.nette.org/en/caching).
