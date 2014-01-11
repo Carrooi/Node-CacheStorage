@@ -1,6 +1,6 @@
 Storage = require './Storage'
 
-class DevNullStorage extends Storage
+class DevNullSyncStorage extends Storage
 
 
 	async: false
@@ -30,4 +30,4 @@ class DevNullStorage extends Storage
 		return @
 
 
-module.exports = DevNullStorage
+module.exports = DevNullSyncStorage

@@ -10,6 +10,7 @@
 			"aliases": {
 				"cache-storage": "/lib/Cache",
 				"cache-storage/Storage/BrowserLocalStorage": "/lib/Storage/BrowserLocalStorage",
+				"cache-storage/Storage/DevNullSyncStorage": "/lib/Storage/DevNullSyncStorage",
 				"cache-storage/Storage/DevNullStorage": "/lib/Storage/DevNullStorage",
 				"cache-storage/Storage/FileStorage": "/lib/Storage/FileStorage",
 				"cache-storage/Storage/MemoryStorage": "/lib/Storage/MemoryStorage",
@@ -19,7 +20,7 @@
 				"/test/browser/tests/Cache",
 				"/test/browser/tests/BrowserLocalStorage",
 				"/test/browser/tests/FileStorage",
-				"/test/browser/tests/DevNullStorage",
+				"/test/browser/tests/DevNullSyncStorage",
 				"/test/browser/tests/MemoryStorage"
 			]
 		}
