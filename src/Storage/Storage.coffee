@@ -18,6 +18,8 @@ checkFilesSupport = ->
 class Storage
 
 
+	async: false
+
 	cache: null
 
 
