@@ -1,5 +1,5 @@
 Storage = require './Storage'
-Cache = require '../Cache'
+Cache = require '../../Cache'
 
 class BrowserLocalStorage extends Storage
 

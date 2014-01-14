@@ -1,13 +1,13 @@
 expect = require('chai').expect
 path = require 'path'
 
-Cache = require '../../../lib/Cache'
-FileStorage = require '../../../lib/Storage/FileStorage'
+Cache = require '../../../../../lib/Cache'
+FileStorage = require '../../../../../Storage/FileSyncStorage'
 
 fs = null
 cache = null
 
-describe 'FileStorage', ->
+describe 'FileSyncStorage', ->
 
 	beforeEach( ->
 		fs = Cache.mockFs(
@@ -21,6 +21,7 @@ describe 'FileStorage', ->
 	)
 
 	describe '#constructor()', ->
+
 		it 'should throw an error if path does not exists', ->
 			expect( -> new FileStorage('./unknown/path') ).to.throw()
 

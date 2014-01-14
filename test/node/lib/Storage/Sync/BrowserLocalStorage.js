@@ -4,11 +4,11 @@
 
   expect = require('chai').expect;
 
-  Cache = require('../../../lib/Cache');
+  Cache = require('../../../../../lib/Cache');
 
-  BrowserLocalStorage = require('../../../lib/Storage/BrowserLocalStorage');
+  BrowserLocalStorage = require('../../../../../Storage/BrowserLocalSyncStorage');
 
-  describe('BrowserLocalStorage', function() {
+  describe('BrowserLocalSyncStorage', function() {
     return describe('#constructor()', function() {
       return it('should throws an error if local storage is not supported', function() {
         return expect(function() {

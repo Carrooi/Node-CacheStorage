@@ -4,13 +4,13 @@
 
   expect = require('chai').expect;
 
-  Cache = require('../../../lib/Cache');
+  Cache = require('../../../../../lib/Cache');
 
-  DevNullStorage = require('../../../lib/Storage/DevNullStorage');
+  DevNullStorage = require('../../../../../Storage/DevNullSyncStorage');
 
   cache = null;
 
-  describe('DevNullStorage', function() {
+  describe('DevNullSyncStorage', function() {
     return describe('saving/loading', function() {
       beforeEach(function() {
         return cache = new Cache(new DevNullStorage, 'test');

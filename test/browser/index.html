@@ -13,6 +13,24 @@
 			mocha.ui('bdd');
 			mocha.reporter('html');
 			var expect = chai.expect;
+
+			// helper for simulating files expiration
+			window.changeFile = function(file) {
+				var stats = window.require.getStats(file)
+				var oldStats = {};
+				var newStats = {};
+
+				oldStats[file] = stats;
+				newStats[window.require.resolve(file)] = {
+					atime: stats.atime.getTime(),
+					mtime: (new Date(stats.mtime.getTime())).setHours(stats.mtime.getHours() + 1),
+					ctime: stats.ctime.getTime()
+				};
+
+				window.require.__setStats(newStats);
+
+				return oldStats;
+			};
 		</script>
 
 		<script src="application.js"></script>

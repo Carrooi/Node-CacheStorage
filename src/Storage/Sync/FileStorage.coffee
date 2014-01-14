@@ -1,5 +1,5 @@
 Storage = require './Storage'
-Cache = require '../Cache'
+Cache = require '../../Cache'
 
 fs = null
 path = null
@@ -60,6 +60,10 @@ class FileStorage extends Storage
 
 
 	writeData: (@data, @meta) ->
+		@allData =
+			data: @data
+			meta: @meta
+
 		file = @getFileName()
 		Cache.getFs().writeFileSync(file, JSON.stringify(
 			data: @data

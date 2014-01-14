@@ -1,7 +1,7 @@
 
-FileStorage = require 'cache-storage/Storage/FileStorage'
+FileStorage = require 'cache-storage/Storage/FileSyncStorage'
 
-describe 'FileStorage', ->
+describe 'FileSyncStorage', ->
 
 	describe '#constructor()', ->
 		it 'should throw an error on browser', ->

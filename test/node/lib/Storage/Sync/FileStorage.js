@@ -6,15 +6,15 @@
 
   path = require('path');
 
-  Cache = require('../../../lib/Cache');
+  Cache = require('../../../../../lib/Cache');
 
-  FileStorage = require('../../../lib/Storage/FileStorage');
+  FileStorage = require('../../../../../Storage/FileSyncStorage');
 
   fs = null;
 
   cache = null;
 
-  describe('FileStorage', function() {
+  describe('FileSyncStorage', function() {
     beforeEach(function() {
       return fs = Cache.mockFs({
         'temp': {},
