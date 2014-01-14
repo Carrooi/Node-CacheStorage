@@ -1,5 +1,6 @@
 expect = require('chai').expect
 path = require 'path'
+async = require 'async'
 
 fs = null
 
@@ -51,48 +52,70 @@ describe 'MemoryAsyncStorage', ->
 
 	describe 'expiration', ->
 
-		it.skip 'should expire "true" value after file is changed', (done) ->
+		it 'should expire "true" value after file is changed', (done) ->
 			cache.save 'true', true, {files: ['/file']}, ->
 				setTimeout( ->
-					fs.writeFileSync('/file', '')
 					cache.load 'true', (data) ->
-						expect(data).to.be.null
-						done()
+						expect(data).to.be.true
+						fs.writeFileSync('/file', '')
+						cache.load 'true', (data) ->
+							expect(data).to.be.null
+							done()
 				, 100)
 
 
-		it.skip 'should remove all items with tag "article"', ->
-			cache.save 'one', 'one', {tags: ['article']}
-			cache.save 'two', 'two', {tags: ['category']}
-			cache.save 'three', 'three', {tags: ['article']}
-			cache.clean tags: ['article']
-			expect(cache.load 'one').to.be.null
-			expect(cache.load 'two').to.be.equal 'two'
-			expect(cache.load 'three').to.be.null
+		it 'should remove all items with tag "article"', (done) ->
+			data = [
+				['one', null, ['article']]
+				['two', 'two', ['category']]
+				['three', null, ['article']]
+			]
+			async.each(data, (item, cb) ->
+				cache.save item[0], item[0], {tags: item[2]}, -> cb()
+			, ->
+				cache.clean(tags: ['article'], ->
+					async.each(data, (item, cb) ->
+						cache.load item[0], (data) ->
+							expect(data).to.be.equal(item[1])
+							cb()
+					, ->
+						done()
+					)
+				)
+			)
 
-		it.skip 'should expire "true" value after 1 second"', (done) ->
-			cache.save 'true', true, {expire: {seconds: 1}}
-			setTimeout( ->
-				expect(cache.load 'true').to.be.null
-				done()
-			, 1100)
+		it 'should expire "true" value after 1 second"', (done) ->
+			cache.save 'true', true, {expire: {seconds: 1}}, ->
+				setTimeout( ->
+					cache.load 'true', (data) ->
+						expect(data).to.be.null
+						done()
+				, 1100)
 
-		it.skip 'should expire "true" value after "first" value expire', ->
-			cache.save 'first', 'first'
-			cache.save 'true', true, {items: ['first']}
-			cache.remove 'first'
-			expect(cache.load 'true').to.be.null
+		it 'should expire "true" value after "first" value expire', (done) ->
+			cache.save 'first', 'first', ->
+				cache.save 'true', true, {items: ['first']}, ->
+					cache.remove 'first', ->
+						cache.load 'true', (data) ->
+							expect(data).to.be.null
+							done()
 
-		it.skip 'should expire all items with priority bellow 50', ->
-			cache.save 'one', 'one', {priority: 100}
-			cache.save 'two', 'two', {priority: 10}
-			cache.clean {priority: 50}
-			expect(cache.load 'one').to.be.equal('one')
-			expect(cache.load 'two').to.be.null
+		it 'should expire all items with priority bellow 50', (done) ->
+			cache.save 'one', 'one', {priority: 100}, ->
+				cache.save 'two', 'two', {priority: 10}, ->
+					cache.clean {priority: 50}, ->
+						cache.load 'one', (data) ->
+							expect(data).to.be.equal('one')
+							cache.load 'two', (data) ->
+								expect(data).to.be.null
+								done()
 
-		it.skip 'should remove all items from cache', ->
-			cache.save 'one', 'one'
-			cache.save 'two', 'two'
-			cache.clean 'all'
-			expect(cache.load 'one').to.be.null
-			expect(cache.load 'two').to.be.null
+		it 'should remove all items from cache', (done) ->
+			cache.save 'one', 'one', ->
+				cache.save 'two', 'two', ->
+					cache.clean 'all', ->
+						cache.load 'one', (data) ->
+							expect(data).to.be.null
+							cache.load 'two', (data) ->
+								expect(data).to.be.null
+								done()

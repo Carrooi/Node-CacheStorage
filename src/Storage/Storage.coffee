@@ -7,8 +7,9 @@ class Storage
 
 
 	constructor: ->
-		if typeof @getData == 'undefined' || typeof @getMeta == 'undefined' || typeof @writeData == 'undefined'
-			throw new Error 'Cache storage: you have to implement methods getData, getMeta and writeData.'
+		if @ !instanceof Storage	# for testing
+			if typeof @getData == 'undefined' || typeof @getMeta == 'undefined' || typeof @writeData == 'undefined'
+				throw new Error 'Cache storage: you have to implement methods getData, getMeta and writeData.'
 
 
 	checkFilesSupport: ->

@@ -10,6 +10,8 @@
 			],
 			"aliases": {
 				"cache-storage": "/lib/Cache",
+				"cache-storage/lib/Storage/Sync/Storage": "/lib/Storage/Sync/Storage",
+				"cache-storage/lib/Storage/Async/Storage": "/lib/Storage/Async/Storage",
 				"cache-storage/Storage/BrowserLocalSyncStorage": "/Storage/BrowserLocalSyncStorage",
 				"cache-storage/Storage/DevNullSyncStorage": "/Storage/DevNullSyncStorage",
 				"cache-storage/Storage/FileSyncStorage": "/Storage/FileSyncStorage",
@@ -19,6 +21,8 @@
 			},
 			"run": [
 				"/test/browser/tests/Cache",
+				"/test/browser/tests/Storage/Sync/Storage",
+				"/test/browser/tests/Storage/Async/Storage",
 				"/test/browser/tests/Storage/Sync/BrowserLocalStorage",
 				"/test/browser/tests/Storage/Sync/FileStorage",
 				"/test/browser/tests/Storage/Sync/DevNullStorage",

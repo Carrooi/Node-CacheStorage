@@ -443,12 +443,27 @@
 	      var file, item, mtime, time, typefn, _i, _len, _ref1, _ref2, _ref3;
 	      typefn = Object.prototype.toString;
 	      if (typefn.call(meta) === '[object Object]') {
+	        if (typeof meta[Cache.EXPIRE] !== 'undefined') {
+	          if (moment().valueOf() >= meta[Cache.EXPIRE]) {
+	            return false;
+	          }
+	        }
+	        if (typeof meta[Cache.ITEMS] !== 'undefined') {
+	          _ref1 = meta[Cache.ITEMS];
+	          for (_i = 0, _len = _ref1.length; _i < _len; _i++) {
+	            item = _ref1[_i];
+	            item = this.findMeta(item);
+	            if ((item === null) || (item !== null && this.verify(item) === false)) {
+	              return false;
+	            }
+	          }
+	        }
 	        if (typeof meta[Cache.FILES] !== 'undefined') {
 	          this.checkFilesSupport();
 	          if (isWindow) {
-	            _ref1 = meta[Cache.FILES];
-	            for (file in _ref1) {
-	              time = _ref1[file];
+	            _ref2 = meta[Cache.FILES];
+	            for (file in _ref2) {
+	              time = _ref2[file];
 	              mtime = window.require.getStats(file).mtime;
 	              if (mtime === null) {
 	                throw new Error('File stats are disabled in your simq configuration. Can not get stats for ' + file + '.');
@@ -458,30 +473,12 @@
 	              }
 	            }
 	          } else {
-	            _ref2 = meta[Cache.FILES];
-	            for (file in _ref2) {
-	              time = _ref2[file];
+	            _ref3 = meta[Cache.FILES];
+	            for (file in _ref3) {
+	              time = _ref3[file];
 	              if ((new Date(Cache.getFs().statSync(file).mtime)).getTime() !== time) {
 	                return false;
 	              }
-	            }
-	          }
-	        }
-	        if (typeof meta[Cache.EXPIRE] !== 'undefined') {
-	          if (moment().valueOf() >= meta[Cache.EXPIRE]) {
-	            return false;
-	          }
-	        }
-	        if (typeof meta[Cache.ITEMS] !== 'undefined') {
-	          if (this.async) {
-	            throw new Error('Expiration by items is currently not supported in async storages.');
-	          }
-	          _ref3 = meta[Cache.ITEMS];
-	          for (_i = 0, _len = _ref3.length; _i < _len; _i++) {
-	            item = _ref3[_i];
-	            item = this.findMeta(item);
-	            if ((item === null) || (item !== null && this.verify(item) === false)) {
-	              return false;
 	            }
 	          }
 	        }
@@ -490,33 +487,23 @@
 	    };
 	
 	    Storage.prototype.parseDependencies = function(dependencies) {
-	      var file, files, i, item, mtime, result, time, typefn, _i, _j, _k, _len, _len1, _len2, _ref1, _ref2, _ref3;
+	      var file, files, item, mtime, result, time, typefn, _i, _j, _k, _len, _len1, _len2, _ref1, _ref2, _ref3;
 	      typefn = Object.prototype.toString;
 	      result = {};
 	      if (typefn.call(dependencies) === '[object Object]') {
-	        if (typeof dependencies[Cache.FILES] !== 'undefined') {
-	          this.checkFilesSupport();
-	          files = {};
-	          if (isWindow) {
-	            _ref1 = dependencies[Cache.FILES];
-	            for (_i = 0, _len = _ref1.length; _i < _len; _i++) {
-	              file = _ref1[_i];
-	              mtime = window.require.getStats(file).mtime;
-	              if (mtime === null) {
-	                throw new Error('File stats are disabled in your simq configuration. Can not get stats for ' + file + '.');
-	              }
-	              file = window.require.resolve(file);
-	              files[file] = mtime.getTime();
-	            }
-	          } else {
-	            _ref2 = dependencies[Cache.FILES];
-	            for (_j = 0, _len1 = _ref2.length; _j < _len1; _j++) {
-	              file = _ref2[_j];
-	              file = path.resolve(file);
-	              files[file] = (new Date(Cache.getFs().statSync(file).mtime)).getTime();
-	            }
+	        if (typeof dependencies[Cache.PRIORITY] !== 'undefined') {
+	          result[Cache.PRIORITY] = dependencies[Cache.PRIORITY];
+	        }
+	        if (typeof dependencies[Cache.TAGS] !== 'undefined') {
+	          result[Cache.TAGS] = dependencies[Cache.TAGS];
+	        }
+	        if (typeof dependencies[Cache.ITEMS] !== 'undefined') {
+	          result[Cache.ITEMS] = [];
+	          _ref1 = dependencies[Cache.ITEMS];
+	          for (_i = 0, _len = _ref1.length; _i < _len; _i++) {
+	            item = _ref1[_i];
+	            result[Cache.ITEMS].push(this.cache.generateKey(item));
 	          }
-	          result[Cache.FILES] = files;
 	        }
 	        if (typeof dependencies[Cache.EXPIRE] !== 'undefined') {
 	          switch (typefn.call(dependencies[Cache.EXPIRE])) {
@@ -531,19 +518,29 @@
 	          }
 	          result[Cache.EXPIRE] = time.valueOf();
 	        }
-	        if (typeof dependencies[Cache.ITEMS] !== 'undefined') {
-	          result[Cache.ITEMS] = [];
-	          _ref3 = dependencies[Cache.ITEMS];
-	          for (i = _k = 0, _len2 = _ref3.length; _k < _len2; i = ++_k) {
-	            item = _ref3[i];
-	            result[Cache.ITEMS].push(this.cache.generateKey(item));
+	        if (typeof dependencies[Cache.FILES] !== 'undefined') {
+	          this.checkFilesSupport();
+	          files = {};
+	          if (isWindow) {
+	            _ref2 = dependencies[Cache.FILES];
+	            for (_j = 0, _len1 = _ref2.length; _j < _len1; _j++) {
+	              file = _ref2[_j];
+	              mtime = window.require.getStats(file).mtime;
+	              if (mtime === null) {
+	                throw new Error('File stats are disabled in your simq configuration. Can not get stats for ' + file + '.');
+	              }
+	              file = window.require.resolve(file);
+	              files[file] = mtime.getTime();
+	            }
+	          } else {
+	            _ref3 = dependencies[Cache.FILES];
+	            for (_k = 0, _len2 = _ref3.length; _k < _len2; _k++) {
+	              file = _ref3[_k];
+	              file = path.resolve(file);
+	              files[file] = (new Date(Cache.getFs().statSync(file).mtime)).getTime();
+	            }
 	          }
-	        }
-	        if (typeof dependencies[Cache.PRIORITY] !== 'undefined') {
-	          result[Cache.PRIORITY] = dependencies[Cache.PRIORITY];
-	        }
-	        if (typeof dependencies[Cache.TAGS] !== 'undefined') {
-	          result[Cache.TAGS] = dependencies[Cache.TAGS];
+	          result[Cache.FILES] = files;
 	        }
 	      }
 	      return result;
@@ -580,8 +577,10 @@
 	    Storage.prototype.cache = null;
 	
 	    function Storage() {
-	      if (typeof this.getData === 'undefined' || typeof this.getMeta === 'undefined' || typeof this.writeData === 'undefined') {
-	        throw new Error('Cache storage: you have to implement methods getData, getMeta and writeData.');
+	      if (!(this instanceof Storage)) {
+	        if (typeof this.getData === 'undefined' || typeof this.getMeta === 'undefined' || typeof this.writeData === 'undefined') {
+	          throw new Error('Cache storage: you have to implement methods getData, getMeta and writeData.');
+	        }
 	      }
 	    }
 	
@@ -4805,12 +4804,12 @@
 	          return fn(null);
 	        } else {
 	          return _this.findMeta(key, function(meta) {
-	            return _this.verify(meta[key], function(state) {
+	            return _this.verify(meta, function(state) {
 	              if (state) {
 	                return fn(data[key]);
 	              } else {
 	                return _this.remove(key, function() {
-	                  return fn();
+	                  return fn(null);
 	                });
 	              }
 	            });
@@ -4851,44 +4850,46 @@
 	    };
 	
 	    Storage.prototype.clean = function(conditions, fn) {
-	      var key, keys, tag, type, typeFn, _i, _j, _k, _len, _len1, _len2, _ref1, _ref2, _ref3,
+	      var keys, removeKeys, type, typeFn,
 	        _this = this;
 	      typeFn = Object.prototype.toString;
 	      type = typeFn.call(conditions);
 	      if (conditions === Cache.ALL) {
 	        this.writeData({}, {}, fn);
 	      } else if (type === '[object Object]') {
+	        if (typeof conditions[Cache.TAGS] === 'undefined') {
+	          conditions[Cache.TAGS] = [];
+	        }
+	        if (typeFn(conditions[Cache.TAGS]) === '[object String]') {
+	          conditions[Cache.TAGS] = [conditions[Cache.TAGS]];
+	        }
+	        removeKeys = function(keys) {
+	          return async.each(keys, function(key, cb) {
+	            return _this.remove(key, function() {
+	              return cb();
+	            });
+	          }, function() {
+	            return fn();
+	          });
+	        };
 	        keys = [];
-	        if (typeof conditions[Cache.TAGS] !== 'undefined') {
-	          if (typeFn(conditions[Cache.TAGS]) === '[object String]') {
-	            conditions[Cache.TAGS] = [conditions[Cache.TAGS]];
-	          }
-	          _ref1 = conditions[Cache.TAGS];
-	          for (_i = 0, _len = _ref1.length; _i < _len; _i++) {
-	            tag = _ref1[_i];
-	            _ref2 = this.findKeysByTag(tag);
-	            for (_j = 0, _len1 = _ref2.length; _j < _len1; _j++) {
-	              key = _ref2[_j];
-	              keys.push(key);
-	              this.remove(key);
-	            }
-	          }
-	        }
-	        if (typeof conditions[Cache.PRIORITY] !== 'undefined') {
-	          _ref3 = this.findKeysByPriority(conditions[Cache.PRIORITY]);
-	          for (_k = 0, _len2 = _ref3.length; _k < _len2; _k++) {
-	            key = _ref3[_k];
-	            keys.push(key);
-	            this.remove(key);
-	          }
-	        }
-	        async.each(keys, function(key, cb) {
-	          return _this.remove(key, function() {
+	        async.each(conditions[Cache.TAGS], function(tag, cb) {
+	          return _this.findKeysByTag(tag, function(_keys) {
+	            keys = keys.concat(_keys);
 	            return cb();
 	          });
 	        }, function() {
-	          return fn();
+	          if (typeof conditions[Cache.PRIORITY] === 'undefined') {
+	            return removeKeys(keys);
+	          } else {
+	            return _this.findKeysByPriority(conditions[Cache.PRIORITY], function(_keys) {
+	              keys = keys.concat(_keys);
+	              return removeKeys(keys);
+	            });
+	          }
 	        });
+	      } else {
+	        fn();
 	      }
 	      return this;
 	    };
@@ -4945,13 +4946,13 @@
 	        if (typeof meta[Cache.ITEMS] === 'undefined') {
 	          meta[Cache.ITEMS] = [];
 	        }
-	        async.each(meta[Cache.ITEMS], function(item, cb) {
-	          return _this.findMeta(item, function(item) {
-	            if (item === null) {
+	        return async.each(meta[Cache.ITEMS], function(item, cb) {
+	          return _this.findMeta(item, function(meta) {
+	            if (meta === null) {
 	              fn(false);
 	              return cb(new Error('Fake error'));
-	            } else if (item !== null) {
-	              return this.verify(item, function(state) {
+	            } else if (meta !== null) {
+	              return _this.verify(meta, function(state) {
 	                if (state === false) {
 	                  fn(false);
 	                  return cb(new Error('Fake error'));
@@ -4964,7 +4965,7 @@
 	            }
 	          });
 	        }, function(err) {
-	          var file, files, mtime, time, _ref1, _ref2, _ref3, _results, _results1;
+	          var file, files, mtime, time, _ref1, _ref2, _ref3;
 	          if (!err) {
 	            if (typeof meta[Cache.FILES] === 'undefined') {
 	              meta[Cache.FILES] = [];
@@ -4972,7 +4973,6 @@
 	            _this.checkFilesSupport();
 	            if (isWindow) {
 	              _ref1 = meta[Cache.FILES];
-	              _results = [];
 	              for (file in _ref1) {
 	                time = _ref1[file];
 	                mtime = window.require.getStats(file).mtime;
@@ -4980,18 +4980,16 @@
 	                  throw new Error('File stats are disabled in your simq configuration. Can not get stats for ' + file + '.');
 	                }
 	                if (window.require.getStats(file).mtime.getTime() !== time) {
-	                  _results.push(fn(false));
-	                } else {
-	                  _results.push(void 0);
+	                  fn(false);
+	                  return null;
 	                }
 	              }
-	              return _results;
+	              return fn(true);
 	            } else {
+	              files = [];
 	              _ref2 = meta[Cache.FILES];
-	              _results1 = [];
 	              for (file in _ref2) {
 	                time = _ref2[file];
-	                files = [];
 	                _ref3 = meta[Cache.FILES];
 	                for (file in _ref3) {
 	                  time = _ref3[file];
@@ -5000,37 +4998,39 @@
 	                    time: time
 	                  });
 	                }
-	                _results1.push(async.each(files, function(item, cb) {
-	                  return Cache.getFs().stat(file, function(err, stats) {
-	                    if (err) {
-	                      return cb(err);
-	                    } else {
-	                      if ((new Date(stats.mtime)).getTime() !== time) {
-	                        fn(false);
-	                        return cb(new Error('Fake error'));
-	                      }
-	                    }
-	                  });
-	                }, function(err) {
-	                  if (err && err.message === 'Fake error') {
-	
-	                  } else if (err) {
-	                    throw err;
-	                  } else {
-	                    return fn(true);
-	                  }
-	                }));
 	              }
-	              return _results1;
+	              return async.each(files, function(item, cb) {
+	                return Cache.getFs().stat(item.file, function(err, stats) {
+	                  if (err) {
+	                    return cb(err);
+	                  } else {
+	                    if ((new Date(stats.mtime)).getTime() !== item.time) {
+	                      fn(false);
+	                      return cb(new Error('Fake error'));
+	                    } else {
+	                      return cb();
+	                    }
+	                  }
+	                });
+	              }, function(err) {
+	                if (err && err.message === 'Fake error') {
+	
+	                } else if (err) {
+	                  throw err;
+	                } else {
+	                  return fn(true);
+	                }
+	              });
 	            }
 	          }
 	        });
+	      } else {
+	        return fn(true);
 	      }
-	      return fn(true);
 	    };
 	
 	    Storage.prototype.parseDependencies = function(dependencies, fn) {
-	      var file, files, i, item, mtime, result, time, typefn, _i, _j, _k, _len, _len1, _len2, _ref1, _ref2, _ref3;
+	      var file, files, item, mtime, result, time, typefn, _i, _j, _k, _len, _len1, _len2, _ref1, _ref2, _ref3;
 	      typefn = Object.prototype.toString;
 	      result = {};
 	      if (typefn.call(dependencies) === '[object Object]') {
@@ -5050,8 +5050,8 @@
 	        if (typeof dependencies[Cache.ITEMS] !== 'undefined') {
 	          result[Cache.ITEMS] = [];
 	          _ref1 = dependencies[Cache.ITEMS];
-	          for (i = _i = 0, _len = _ref1.length; _i < _len; i = ++_i) {
-	            item = _ref1[i];
+	          for (_i = 0, _len = _ref1.length; _i < _len; _i++) {
+	            item = _ref1[_i];
 	            result[Cache.ITEMS].push(this.cache.generateKey(item));
 	          }
 	        }
@@ -5075,6 +5075,8 @@
 	              file = window.require.resolve(file);
 	              files[file] = mtime.getTime();
 	            }
+	            result[Cache.FILES] = files;
+	            fn(result);
 	          } else {
 	            async.each(dependencies[Cache.FILES], function(file, cb) {
 	              file = path.resolve(file);
@@ -6565,6 +6567,156 @@
 	}).call(this);
 	
 
+}, '/test/browser/tests/Storage/Async/Storage.coffee': function(exports, module) {
+
+	/** node globals **/
+	var require = function(name) {return window.require(name, '/test/browser/tests/Storage/Async/Storage.coffee');};
+	require.resolve = function(name, parent) {if (parent === null) {parent = '/test/browser/tests/Storage/Async/Storage.coffee';} return window.require.resolve(name, parent);};
+	require.define = function(bundle) {window.require.define(bundle);};
+	require.cache = window.require.cache;
+	var __filename = '/test/browser/tests/Storage/Async/Storage.coffee';
+	var __dirname = '/test/browser/tests/Storage/Async';
+	var process = {cwd: function() {return '/';}, argv: ['node', '/test/browser/tests/Storage/Async/Storage.coffee'], env: {}};
+
+	/** code **/
+	(function() {
+	  var Cache, Storage, moment, storage;
+	
+	  Cache = require('cache-storage');
+	
+	  Storage = require('cache-storage/lib/Storage/Async/Storage');
+	
+	  moment = require('moment');
+	
+	  storage = null;
+	
+	  describe('AsyncStorage', function() {
+	    beforeEach(function() {
+	      return storage = (new Cache(new Storage)).storage;
+	    });
+	    describe('#verify()', function() {
+	      it('should just return true', function(done) {
+	        return storage.verify('random variable', function(state) {
+	          expect(state).to.be["true"];
+	          return done();
+	        });
+	      });
+	      it('should return false if meta expired', function(done) {
+	        return storage.verify({
+	          expire: (new Date).getTime() - 200
+	        }, function(state) {
+	          expect(state).to.be["false"];
+	          return done();
+	        });
+	      });
+	      it('should return false if dependent meta expired', function(done) {
+	        storage.findMeta = function(key, fn) {
+	          return fn({
+	            expire: (new Date).getTime() - 200
+	          });
+	        };
+	        return storage.verify({
+	          items: ['test']
+	        }, function(state) {
+	          expect(state).to.be["false"];
+	          return done();
+	        });
+	      });
+	      return it('should return false if file was changed', function(done) {
+	        var files, meta;
+	        files = {};
+	        files[__filename] = window.require.getStats(__filename).mtime.getTime();
+	        meta = {
+	          files: files
+	        };
+	        return setTimeout(function() {
+	          return storage.verify(meta, function(state) {
+	            var newStats, oldStats, stats;
+	            expect(state).to.be["true"];
+	            stats = window.require.getStats(__filename);
+	            oldStats = {};
+	            oldStats[__filename] = stats;
+	            newStats = {};
+	            newStats[window.require.resolve(__filename)] = {
+	              atime: stats.atime.getTime(),
+	              mtime: (new Date(stats.mtime.getTime())).setHours(stats.mtime.getHours() + 1),
+	              ctime: stats.ctime.getTime()
+	            };
+	            window.require.__setStats(newStats);
+	            return storage.verify(meta, function(state) {
+	              expect(state).to.be["false"];
+	              return done();
+	            });
+	          });
+	        }, 100);
+	      });
+	    });
+	    return describe('#parseDependencies()', function() {
+	      it('should return empty object for unknown type of dependencies', function(done) {
+	        return storage.parseDependencies('random variable', function(dependencies) {
+	          expect(dependencies).to.be.eql({});
+	          return done();
+	        });
+	      });
+	      it('should add priority into dependencies', function(done) {
+	        return storage.parseDependencies({
+	          priority: 100
+	        }, function(dependencies) {
+	          expect(dependencies).to.be.eql({
+	            priority: 100
+	          });
+	          return done();
+	        });
+	      });
+	      it('should add tags into dependencies', function(done) {
+	        return storage.parseDependencies({
+	          tags: ['comment', 'article']
+	        }, function(dependencies) {
+	          expect(dependencies).to.be.eql({
+	            tags: ['comment', 'article']
+	          });
+	          return done();
+	        });
+	      });
+	      it('should add dependent item into dependencies', function(done) {
+	        return storage.parseDependencies({
+	          items: ['first', 'second']
+	        }, function(dependencies) {
+	          expect(dependencies).to.be.eql({
+	            items: [97440432, -906279820]
+	          });
+	          return done();
+	        });
+	      });
+	      it('should add date from string into dependencies', function(done) {
+	        return storage.parseDependencies({
+	          expire: '2014-01-14 20:10'
+	        }, function(dependencies) {
+	          expect(dependencies).to.be.eql({
+	            expire: 1389726600000
+	          });
+	          return done();
+	        });
+	      });
+	      return it('should add file into dependencies', function(done) {
+	        var files;
+	        files = {};
+	        files[__filename] = window.require.getStats(__filename).mtime.getTime();
+	        return storage.parseDependencies({
+	          files: [__filename]
+	        }, function(dependencies) {
+	          expect(dependencies).to.be.eql({
+	            files: files
+	          });
+	          return done();
+	        });
+	      });
+	    });
+	  });
+	
+	}).call(this);
+	
+
 }, '/test/browser/tests/Storage/Sync/BrowserLocalStorage.coffee': function(exports, module) {
 
 	/** node globals **/
@@ -6918,6 +7070,125 @@
 	}).call(this);
 	
 
+}, '/test/browser/tests/Storage/Sync/Storage.coffee': function(exports, module) {
+
+	/** node globals **/
+	var require = function(name) {return window.require(name, '/test/browser/tests/Storage/Sync/Storage.coffee');};
+	require.resolve = function(name, parent) {if (parent === null) {parent = '/test/browser/tests/Storage/Sync/Storage.coffee';} return window.require.resolve(name, parent);};
+	require.define = function(bundle) {window.require.define(bundle);};
+	require.cache = window.require.cache;
+	var __filename = '/test/browser/tests/Storage/Sync/Storage.coffee';
+	var __dirname = '/test/browser/tests/Storage/Sync';
+	var process = {cwd: function() {return '/';}, argv: ['node', '/test/browser/tests/Storage/Sync/Storage.coffee'], env: {}};
+
+	/** code **/
+	(function() {
+	  var Cache, Storage, moment, storage;
+	
+	  Cache = require('cache-storage');
+	
+	  Storage = require('cache-storage/lib/Storage/Sync/Storage');
+	
+	  moment = require('moment');
+	
+	  storage = null;
+	
+	  describe('SyncStorage', function() {
+	    beforeEach(function() {
+	      return storage = (new Cache(new Storage)).storage;
+	    });
+	    describe('#verify()', function() {
+	      it('should just return true', function() {
+	        return expect(storage.verify('random variable')).to.be["true"];
+	      });
+	      it('should return false if meta expired', function() {
+	        return expect(storage.verify({
+	          expire: (new Date).getTime() - 200
+	        })).to.be["false"];
+	      });
+	      it('should return false if dependent meta expired', function() {
+	        storage.findMeta = function() {
+	          return {
+	            expire: (new Date).getTime() - 200
+	          };
+	        };
+	        return expect(storage.verify({
+	          items: ['test']
+	        })).to.be["false"];
+	      });
+	      return it('should return false if file was changed', function(done) {
+	        var files, meta;
+	        files = {};
+	        files[__filename] = window.require.getStats(__filename).mtime.getTime();
+	        meta = {
+	          files: files
+	        };
+	        return setTimeout(function() {
+	          var newStats, oldStats, stats;
+	          expect(storage.verify(meta)).to.be["true"];
+	          stats = window.require.getStats(__filename);
+	          oldStats = {};
+	          oldStats[__filename] = stats;
+	          newStats = {};
+	          newStats[window.require.resolve(__filename)] = {
+	            atime: stats.atime.getTime(),
+	            mtime: (new Date(stats.mtime.getTime())).setHours(stats.mtime.getHours() + 1),
+	            ctime: stats.ctime.getTime()
+	          };
+	          window.require.__setStats(newStats);
+	          expect(storage.verify(meta)).to.be["false"];
+	          return done();
+	        }, 100);
+	      });
+	    });
+	    return describe('#parseDependencies()', function() {
+	      it('should return empty object for unknown type of dependencies', function() {
+	        return expect(storage.parseDependencies('random variable')).to.be.eql({});
+	      });
+	      it('should add priority into dependencies', function() {
+	        return expect(storage.parseDependencies({
+	          priority: 100
+	        })).to.be.eql({
+	          priority: 100
+	        });
+	      });
+	      it('should add tags into dependencies', function() {
+	        return expect(storage.parseDependencies({
+	          tags: ['comment', 'article']
+	        })).to.be.eql({
+	          tags: ['comment', 'article']
+	        });
+	      });
+	      it('should add dependent item into dependencies', function() {
+	        return expect(storage.parseDependencies({
+	          items: ['first', 'second']
+	        })).to.be.eql({
+	          items: [97440432, -906279820]
+	        });
+	      });
+	      it('should add date from string into dependencies', function() {
+	        return expect(storage.parseDependencies({
+	          expire: '2014-01-14 20:10'
+	        })).to.be.eql({
+	          expire: 1389726600000
+	        });
+	      });
+	      return it('should add file into dependencies', function() {
+	        var files;
+	        files = {};
+	        files[__filename] = window.require.getStats(__filename).mtime.getTime();
+	        return expect(storage.parseDependencies({
+	          files: [__filename]
+	        })).to.be.eql({
+	          files: files
+	        });
+	      });
+	    });
+	  });
+	
+	}).call(this);
+	
+
 }, '/package.json': function(exports, module) {
 
 	/** node globals **/
@@ -7150,6 +7421,8 @@
 	
 
 }, 'cache-storage': function(exports, module) { module.exports = window.require('/lib/Cache'); }
+, 'cache-storage/lib/Storage/Sync/Storage': function(exports, module) { module.exports = window.require('/lib/Storage/Sync/Storage'); }
+, 'cache-storage/lib/Storage/Async/Storage': function(exports, module) { module.exports = window.require('/lib/Storage/Async/Storage'); }
 , 'cache-storage/Storage/BrowserLocalSyncStorage': function(exports, module) { module.exports = window.require('/Storage/BrowserLocalSyncStorage'); }
 , 'cache-storage/Storage/DevNullSyncStorage': function(exports, module) { module.exports = window.require('/Storage/DevNullSyncStorage'); }
 , 'cache-storage/Storage/FileSyncStorage': function(exports, module) { module.exports = window.require('/Storage/FileSyncStorage'); }
@@ -7162,13 +7435,19 @@
 , 'async': function(exports, module) { module.exports = window.require('async/lib/async.js'); }
 
 });
-require.__setStats({"/lib/Storage/Sync/BrowserLocalStorage.js":{"atime":1389714776000,"mtime":1389714749000,"ctime":1389714749000},"/lib/Storage/Sync/Storage.js":{"atime":1389710368000,"mtime":1389710339000,"ctime":1389710339000},"/lib/Storage/Storage.js":{"atime":1389710368000,"mtime":1389710339000,"ctime":1389710339000},"moment/moment.js":{"atime":1389639277000,"mtime":1387832828000,"ctime":1389389769000},"/lib/Cache.js":{"atime":1389714061000,"mtime":1389714059000,"ctime":1389714059000},"fs-mock/lib/fs.js":{"atime":1389710368000,"mtime":1389273046000,"ctime":1389391420000},"fs-mock/lib/Stats.js":{"atime":1389710369000,"mtime":1389269301000,"ctime":1389391420000},"fs-mock/lib/Errors.js":{"atime":1389710369000,"mtime":1389269301000,"ctime":1389391420000},"fs-mock/lib/FSWatcher.js":{"atime":1389710369000,"mtime":1389269301000,"ctime":1389391420000},"escape-regexp/index.js":{"atime":1389710369000,"mtime":1345153109000,"ctime":1389391421000},"/lib/Storage/Async/DevNullStorage.js":{"atime":1389714776000,"mtime":1389714738000,"ctime":1389714738000},"/lib/Storage/Async/Storage.js":{"atime":1389714061000,"mtime":1389713968000,"ctime":1389713968000},"async/lib/async.js":{"atime":1389710368000,"mtime":1369727354000,"ctime":1389710356000},"/lib/Storage/Sync/DevNullStorage.js":{"atime":1389714776000,"mtime":1389714761000,"ctime":1389714761000},"/lib/Storage/Sync/FileStorage.js":{"atime":1389714776000,"mtime":1389714767000,"ctime":1389714767000},"/lib/Storage/Async/MemoryStorage.js":{"atime":1389716628000,"mtime":1389716623000,"ctime":1389716623000},"/lib/Storage/Sync/MemoryStorage.js":{"atime":1389714776000,"mtime":1389714772000,"ctime":1389714772000},"/Storage/BrowserLocalStorage.js":{"atime":1389715435000,"mtime":1389715212000,"ctime":1389715212000},"/Storage/BrowserLocalSyncStorage.js":{"atime":1389715173000,"mtime":1389462062000,"ctime":1389715173000},"/Storage/DevNullAsyncStorage.js":{"atime":1389710368000,"mtime":1389462072000,"ctime":1389462072000},"/Storage/DevNullStorage.js":{"atime":1389710368000,"mtime":1389462081000,"ctime":1389462081000},"/Storage/DevNullSyncStorage.js":{"atime":1389710368000,"mtime":1389462092000,"ctime":1389462092000},"/Storage/FileStorage.js":{"atime":1389715435000,"mtime":1389715263000,"ctime":1389715263000},"/Storage/FileSyncStorage.js":{"atime":1389715231000,"mtime":1389462097000,"ctime":1389715231000},"/Storage/MemoryAsyncStorage.js":{"atime":1389716582000,"mtime":1389716131000,"ctime":1389716131000},"/Storage/MemoryStorage.js":{"atime":1389715435000,"mtime":1389715313000,"ctime":1389715313000},"/Storage/MemorySyncStorage.js":{"atime":1389715275000,"mtime":1389462102000,"ctime":1389715275000},"/test/browser/tests/Cache.coffee":{"atime":1389710370000,"mtime":1383999743000,"ctime":1389463648000},"/test/browser/tests/Storage/Sync/BrowserLocalStorage.coffee":{"atime":1389715437000,"mtime":1389715408000,"ctime":1389715408000},"/test/browser/tests/Storage/Sync/DevNullStorage.coffee":{"atime":1389710370000,"mtime":1389462249000,"ctime":1389462249000},"/test/browser/tests/Storage/Sync/FileStorage.coffee":{"atime":1389715437000,"mtime":1389715426000,"ctime":1389715426000},"/test/browser/tests/Storage/Sync/MemoryStorage.coffee":{"atime":1389715437000,"mtime":1389715419000,"ctime":1389715419000},"/package.json":{"atime":1389710353000,"mtime":1389639476000,"ctime":1389639476000},"moment/package.json":{"atime":1389710353000,"mtime":1389389769000,"ctime":1389389769000},"async/package.json":{"atime":1389710368000,"mtime":1389710356000,"ctime":1389710356000}});
+require.__setStats({"/lib/Storage/Sync/BrowserLocalStorage.js":{"atime":1389714776000,"mtime":1389714749000,"ctime":1389714749000},"/lib/Storage/Sync/Storage.js":{"atime":1389724941000,"mtime":1389724796000,"ctime":1389724796000},"/lib/Storage/Storage.js":{"atime":1389721873000,"mtime":1389721830000,"ctime":1389721830000},"moment/moment.js":{"atime":1389726647000,"mtime":1387832828000,"ctime":1389389769000},"/lib/Cache.js":{"atime":1389714061000,"mtime":1389714059000,"ctime":1389714059000},"fs-mock/lib/fs.js":{"atime":1389710368000,"mtime":1389273046000,"ctime":1389391420000},"fs-mock/lib/Stats.js":{"atime":1389710369000,"mtime":1389269301000,"ctime":1389391420000},"fs-mock/lib/Errors.js":{"atime":1389710369000,"mtime":1389269301000,"ctime":1389391420000},"fs-mock/lib/FSWatcher.js":{"atime":1389710369000,"mtime":1389269301000,"ctime":1389391420000},"escape-regexp/index.js":{"atime":1389710369000,"mtime":1345153109000,"ctime":1389391421000},"/lib/Storage/Async/DevNullStorage.js":{"atime":1389714776000,"mtime":1389714738000,"ctime":1389714738000},"/lib/Storage/Async/Storage.js":{"atime":1389738645000,"mtime":1389738641000,"ctime":1389738641000},"async/lib/async.js":{"atime":1389710368000,"mtime":1369727354000,"ctime":1389710356000},"/lib/Storage/Sync/DevNullStorage.js":{"atime":1389714776000,"mtime":1389714761000,"ctime":1389714761000},"/lib/Storage/Sync/FileStorage.js":{"atime":1389714776000,"mtime":1389714767000,"ctime":1389714767000},"/lib/Storage/Async/MemoryStorage.js":{"atime":1389716628000,"mtime":1389716623000,"ctime":1389716623000},"/lib/Storage/Sync/MemoryStorage.js":{"atime":1389714776000,"mtime":1389714772000,"ctime":1389714772000},"/Storage/BrowserLocalStorage.js":{"atime":1389715435000,"mtime":1389715212000,"ctime":1389715212000},"/Storage/BrowserLocalSyncStorage.js":{"atime":1389715173000,"mtime":1389462062000,"ctime":1389715173000},"/Storage/DevNullAsyncStorage.js":{"atime":1389710368000,"mtime":1389462072000,"ctime":1389462072000},"/Storage/DevNullStorage.js":{"atime":1389710368000,"mtime":1389462081000,"ctime":1389462081000},"/Storage/DevNullSyncStorage.js":{"atime":1389710368000,"mtime":1389462092000,"ctime":1389462092000},"/Storage/FileStorage.js":{"atime":1389715435000,"mtime":1389715263000,"ctime":1389715263000},"/Storage/FileSyncStorage.js":{"atime":1389715231000,"mtime":1389462097000,"ctime":1389715231000},"/Storage/MemoryAsyncStorage.js":{"atime":1389716582000,"mtime":1389716131000,"ctime":1389716131000},"/Storage/MemoryStorage.js":{"atime":1389715435000,"mtime":1389715313000,"ctime":1389715313000},"/Storage/MemorySyncStorage.js":{"atime":1389715275000,"mtime":1389462102000,"ctime":1389715275000},"/test/browser/tests/Cache.coffee":{"atime":1389710370000,"mtime":1383999743000,"ctime":1389463648000},"/test/browser/tests/Storage/Async/Storage.coffee":{"atime":1389738488000,"mtime":1389738484000,"ctime":1389738484000},"/test/browser/tests/Storage/Sync/BrowserLocalStorage.coffee":{"atime":1389715437000,"mtime":1389715408000,"ctime":1389715408000},"/test/browser/tests/Storage/Sync/DevNullStorage.coffee":{"atime":1389710370000,"mtime":1389462249000,"ctime":1389462249000},"/test/browser/tests/Storage/Sync/FileStorage.coffee":{"atime":1389715437000,"mtime":1389715426000,"ctime":1389715426000},"/test/browser/tests/Storage/Sync/MemoryStorage.coffee":{"atime":1389715437000,"mtime":1389715419000,"ctime":1389715419000},"/test/browser/tests/Storage/Sync/Storage.coffee":{"atime":1389737991000,"mtime":1389737981000,"ctime":1389737981000},"/package.json":{"atime":1389710353000,"mtime":1389639476000,"ctime":1389639476000},"moment/package.json":{"atime":1389710353000,"mtime":1389389769000,"ctime":1389389769000},"async/package.json":{"atime":1389710368000,"mtime":1389710356000,"ctime":1389710356000}});
 require.version = '5.5.1';
 
 /** run section **/
 
 /** /test/browser/tests/Cache **/
 require('/test/browser/tests/Cache');
+
+/** /test/browser/tests/Storage/Sync/Storage **/
+require('/test/browser/tests/Storage/Sync/Storage');
+
+/** /test/browser/tests/Storage/Async/Storage **/
+require('/test/browser/tests/Storage/Async/Storage');
 
 /** /test/browser/tests/Storage/Sync/BrowserLocalStorage **/
 require('/test/browser/tests/Storage/Sync/BrowserLocalStorage');

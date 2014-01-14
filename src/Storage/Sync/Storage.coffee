@@ -91,6 +91,16 @@ class Storage extends BaseStorage
 		typefn = Object.prototype.toString
 
 		if typefn.call(meta) == '[object Object]'
+			if typeof meta[Cache.EXPIRE] != 'undefined'
+				if moment().valueOf() >= meta[Cache.EXPIRE]
+					return false
+
+			if typeof meta[Cache.ITEMS] != 'undefined'
+				for item in meta[Cache.ITEMS]
+					item = @findMeta(item)
+					if (item == null) || (item != null && @verify(item) == false)
+						return false
+
 			if typeof meta[Cache.FILES] != 'undefined'
 				@checkFilesSupport()
 				if isWindow
@@ -99,21 +109,12 @@ class Storage extends BaseStorage
 						if mtime == null
 							throw new Error 'File stats are disabled in your simq configuration. Can not get stats for ' + file + '.'
 
-						if window.require.getStats(file).mtime.getTime() != time then return false
+						if window.require.getStats(file).mtime.getTime() != time
+							return false
 				else
 					for file, time of meta[Cache.FILES]
-						if (new Date(Cache.getFs().statSync(file).mtime)).getTime() != time then return false
-
-			if typeof meta[Cache.EXPIRE] != 'undefined'
-				if moment().valueOf() >= meta[Cache.EXPIRE] then return false
-
-			if typeof meta[Cache.ITEMS] != 'undefined'
-				if @async
-					throw new Error 'Expiration by items is currently not supported in async storages.'
-
-				for item in meta[Cache.ITEMS]
-					item = @findMeta(item)
-					if (item == null) || (item != null && @verify(item) == false) then return false
+						if (new Date(Cache.getFs().statSync(file).mtime)).getTime() != time
+							return false
 
 		return true
 
@@ -123,6 +124,30 @@ class Storage extends BaseStorage
 		result = {}
 
 		if typefn.call(dependencies) == '[object Object]'
+			if typeof dependencies[Cache.PRIORITY] != 'undefined'
+				result[Cache.PRIORITY] = dependencies[Cache.PRIORITY]
+
+			if typeof dependencies[Cache.TAGS] != 'undefined'
+				result[Cache.TAGS] = dependencies[Cache.TAGS]
+
+			if typeof dependencies[Cache.ITEMS] != 'undefined'
+				result[Cache.ITEMS] = []
+				for item in dependencies[Cache.ITEMS]
+					result[Cache.ITEMS].push(@cache.generateKey(item))
+
+			if typeof dependencies[Cache.EXPIRE] != 'undefined'
+				switch typefn.call(dependencies[Cache.EXPIRE])
+					when '[object String]'
+						time = moment(dependencies[Cache.EXPIRE], Cache.TIME_FORMAT)
+
+					when '[object Object]'
+						time = moment().add(dependencies[Cache.EXPIRE])
+
+					else
+						throw new Error 'Expire format is not valid'
+
+				result[Cache.EXPIRE] = time.valueOf()
+
 			if typeof dependencies[Cache.FILES] != 'undefined'
 				@checkFilesSupport()
 				files = {}
@@ -131,29 +156,15 @@ class Storage extends BaseStorage
 						mtime = window.require.getStats(file).mtime
 						if mtime == null
 							throw new Error 'File stats are disabled in your simq configuration. Can not get stats for ' + file + '.'
+
 						file = window.require.resolve(file)
 						files[file] = mtime.getTime()
 				else
 					for file in dependencies[Cache.FILES]
 						file = path.resolve(file)
 						files[file] = (new Date(Cache.getFs().statSync(file).mtime)).getTime()
+
 				result[Cache.FILES] = files
-
-			if typeof dependencies[Cache.EXPIRE] != 'undefined'
-				switch typefn.call(dependencies[Cache.EXPIRE])
-					when '[object String]' then time = moment(dependencies[Cache.EXPIRE], Cache.TIME_FORMAT)
-					when '[object Object]' then time = moment().add(dependencies[Cache.EXPIRE])
-					else throw new Error 'Expire format is not valid'
-				result[Cache.EXPIRE] = time.valueOf()
-
-			if typeof dependencies[Cache.ITEMS] != 'undefined'
-				result[Cache.ITEMS] = []
-				for item, i in dependencies[Cache.ITEMS]
-					result[Cache.ITEMS].push(@cache.generateKey(item))
-
-			if typeof dependencies[Cache.PRIORITY] != 'undefined' then result[Cache.PRIORITY] = dependencies[Cache.PRIORITY]
-
-			if typeof dependencies[Cache.TAGS] != 'undefined' then result[Cache.TAGS] = dependencies[Cache.TAGS]
 
 		return result
 

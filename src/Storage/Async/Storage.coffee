@@ -21,12 +21,12 @@ class Storage extends BaseStorage
 				fn(null)
 			else
 				@findMeta(key, (meta) =>
-					@verify(meta[key], (state) =>
+					@verify(meta, (state) =>
 						if state
 							fn(data[key])
 						else
 							@remove(key, ->
-								fn()
+								fn(null)
 							)
 					)
 				)
@@ -61,30 +61,44 @@ class Storage extends BaseStorage
 	clean: (conditions, fn) ->
 		typeFn = Object.prototype.toString
 		type = typeFn.call(conditions)
+
 		if conditions == Cache.ALL
 			@writeData({}, {}, fn)
 
 		else if type == '[object Object]'
+			if typeof conditions[Cache.TAGS] == 'undefined'
+				conditions[Cache.TAGS] = []
+
+			if typeFn(conditions[Cache.TAGS]) == '[object String]'
+				conditions[Cache.TAGS] = [conditions[Cache.TAGS]]
+
+			removeKeys = (keys) =>
+				async.each(keys, (key, cb) =>
+					@remove(key, ->
+						cb()
+					)
+				, ->
+					fn()
+				)
+
 			keys = []
-			if typeof conditions[Cache.TAGS] != 'undefined'
-				if typeFn(conditions[Cache.TAGS]) == '[object String]' then conditions[Cache.TAGS] = [conditions[Cache.TAGS]]
-				for tag in conditions[Cache.TAGS]
-					for key in @findKeysByTag(tag)
-						keys.push(key)
-						@remove(key)
-
-			if typeof conditions[Cache.PRIORITY] != 'undefined'
-				for key in @findKeysByPriority(conditions[Cache.PRIORITY])
-					keys.push(key)
-					@remove(key)
-
-			async.each(keys, (key, cb) =>
-				@remove(key, ->
+			async.each(conditions[Cache.TAGS], (tag, cb) =>
+				@findKeysByTag(tag, (_keys) ->
+					keys = keys.concat(_keys)
 					cb()
 				)
-			, ->
-				fn()
+			, =>
+				if typeof conditions[Cache.PRIORITY] == 'undefined'
+					removeKeys(keys)
+				else
+					@findKeysByPriority(conditions[Cache.PRIORITY], (_keys) =>
+						keys = keys.concat(_keys)
+						removeKeys(keys)
+					)
 			)
+
+		else
+			fn()
 
 		return @
 
@@ -131,12 +145,12 @@ class Storage extends BaseStorage
 				meta[Cache.ITEMS] = []
 
 			async.each(meta[Cache.ITEMS], (item, cb) =>
-				@findMeta(item, (item) ->
-					if item == null
+				@findMeta(item, (meta) =>
+					if meta == null
 						fn(false)
 						cb(new Error 'Fake error')
-					else if item != null
-						@verify(item, (state) ->
+					else if meta != null
+						@verify(meta, (state) ->
 							if state == false
 								fn(false)
 								cb(new Error 'Fake error')
@@ -160,30 +174,37 @@ class Storage extends BaseStorage
 
 							if window.require.getStats(file).mtime.getTime() != time
 								fn(false)
+								return null
+
+						fn(true)
 					else
+						files = []
 						for file, time of meta[Cache.FILES]
-							files = []
 							files.push(file: file, time: time) for file, time of meta[Cache.FILES]
-							async.each(files, (item, cb) =>
-								Cache.getFs().stat(file, (err, stats) ->
-									if err
-										cb(err)
-									else
-										if (new Date(stats.mtime)).getTime() != time
-											fn(false)
-											cb(new Error 'Fake error')
-								)
-							, (err) ->
-								if err && err.message == 'Fake error'
-									# skip
-								else if err
-									throw err
+
+						async.each(files, (item, cb) =>
+							Cache.getFs().stat(item.file, (err, stats) ->
+								if err
+									cb(err)
 								else
-									fn(true)
+									if (new Date(stats.mtime)).getTime() != item.time
+										fn(false)
+										cb(new Error 'Fake error')
+									else
+										cb()
 							)
+						, (err) ->
+							if err && err.message == 'Fake error'
+								# skip
+							else if err
+								throw err
+							else
+								fn(true)
+						)
 			)
 
-		fn(true)
+		else
+			fn(true)
 
 
 	parseDependencies: (dependencies, fn) ->
@@ -193,19 +214,27 @@ class Storage extends BaseStorage
 		if typefn.call(dependencies) == '[object Object]'
 			if typeof dependencies[Cache.EXPIRE] != 'undefined'
 				switch typefn.call(dependencies[Cache.EXPIRE])
-					when '[object String]' then time = moment(dependencies[Cache.EXPIRE], Cache.TIME_FORMAT)
-					when '[object Object]' then time = moment().add(dependencies[Cache.EXPIRE])
-					else throw new Error 'Expire format is not valid'
+					when '[object String]'
+						time = moment(dependencies[Cache.EXPIRE], Cache.TIME_FORMAT)
+
+					when '[object Object]'
+						time = moment().add(dependencies[Cache.EXPIRE])
+
+					else
+						throw new Error 'Expire format is not valid'
+
 				result[Cache.EXPIRE] = time.valueOf()
 
 			if typeof dependencies[Cache.ITEMS] != 'undefined'
 				result[Cache.ITEMS] = []
-				for item, i in dependencies[Cache.ITEMS]
+				for item in dependencies[Cache.ITEMS]
 					result[Cache.ITEMS].push(@cache.generateKey(item))
 
-			if typeof dependencies[Cache.PRIORITY] != 'undefined' then result[Cache.PRIORITY] = dependencies[Cache.PRIORITY]
+			if typeof dependencies[Cache.PRIORITY] != 'undefined'
+				result[Cache.PRIORITY] = dependencies[Cache.PRIORITY]
 
-			if typeof dependencies[Cache.TAGS] != 'undefined' then result[Cache.TAGS] = dependencies[Cache.TAGS]
+			if typeof dependencies[Cache.TAGS] != 'undefined'
+				result[Cache.TAGS] = dependencies[Cache.TAGS]
 
 			if typeof dependencies[Cache.FILES] != 'undefined'
 				@checkFilesSupport()
@@ -215,8 +244,12 @@ class Storage extends BaseStorage
 						mtime = window.require.getStats(file).mtime
 						if mtime == null
 							throw new Error 'File stats are disabled in your simq configuration. Can not get stats for ' + file + '.'
+
 						file = window.require.resolve(file)
 						files[file] = mtime.getTime()
+
+					result[Cache.FILES] = files
+					fn(result)
 				else
 					async.each(dependencies[Cache.FILES], (file, cb) ->
 						file = path.resolve(file)
