@@ -103,8 +103,10 @@ class Cache
 					fn(data)
 				)
 			else
-				@storage.write(key, data, @storage.parseDependencies(dependencies), ->
-					fn(data)
+				@storage.parseDependencies(dependencies, (dependencies) =>
+					@storage.write(key, data, dependencies, ->
+						fn(data)
+					)
 				)
 		else
 			if data == null
