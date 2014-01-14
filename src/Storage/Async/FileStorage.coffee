@@ -34,41 +34,54 @@ class FileStorage extends Storage
 		return @directory + '/__' + @cache.namespace + '.json'
 
 
-	loadData: ->
+	loadData: (fn) ->
 		if @allData == null
 			file = @getFileName()
-			if Cache.getFs().existsSync(file)
-				@allData = JSON.parse(Cache.getFs().readFileSync(file, encoding: 'utf8'))
-			else
-				@allData = {data: {}, meta: {}}
+			Cache.getFs().exists(file, (exists) =>
+				if exists
+					Cache.getFs().readFile(file, encoding: 'utf8', (err, data) =>
+						if err
+							throw err
 
-		return @allData
+						@allData = JSON.parse(data)
+						fn(@allData)
+					)
+				else
+					@allData = {data: {}, meta: {}}
+					fn(@allData)
+			)
 
-
-	getData: ->
-		if @data == null
-			@data = @loadData().data
-
-		return @data
-
-
-	getMeta: ->
-		if @meta == null
-			@meta = @loadData().meta
-
-		return @meta
+		else
+			fn(@allData)
 
 
-	writeData: (@data, @meta) ->
+	getData: (fn) ->
+		@loadData( (data) ->
+			fn(data.data)
+		)
+
+
+	getMeta: (fn) ->
+		@loadData( (data) ->
+			fn(data.meta)
+		)
+
+
+	writeData: (@data, @meta, fn) ->
 		@allData =
 			data: @data
 			meta: @meta
 
 		file = @getFileName()
-		Cache.getFs().writeFileSync(file, JSON.stringify(
+		Cache.getFs().writeFile(file, JSON.stringify(
 			data: @data
 			meta: @meta
-		))
+		), (err) ->
+			if err
+				throw err
+
+			fn()
+		)
 		return @
 
 

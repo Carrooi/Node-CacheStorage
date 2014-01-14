@@ -21,6 +21,7 @@ describe 'FileSyncStorage', ->
 	)
 
 	describe '#constructor()', ->
+
 		it 'should throw an error if path does not exists', ->
 			expect( -> new FileStorage('./unknown/path') ).to.throw()
 

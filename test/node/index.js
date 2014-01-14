@@ -7,3 +7,4 @@ require('./lib/Storage/Sync/DevNullStorage');
 require('./lib/Storage/Sync/MemoryStorage');
 require('./lib/Storage/Async/DevNullStorage');
 require('./lib/Storage/Async/MemoryStorage');
+require('./lib/Storage/Async/FileStorage');
