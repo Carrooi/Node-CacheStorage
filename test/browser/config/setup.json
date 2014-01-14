@@ -17,7 +17,8 @@
 				"cache-storage/Storage/FileSyncStorage": "/Storage/FileSyncStorage",
 				"cache-storage/Storage/MemorySyncStorage": "/Storage/MemorySyncStorage",
 				"cache-storage/Storage/Storage": "/Storage/Storage",
-				"cache-storage/Storage/DevNullAsyncStorage": "/Storage/DevNullAsyncStorage"
+				"cache-storage/Storage/DevNullAsyncStorage": "/Storage/DevNullAsyncStorage",
+				"cache-storage/Storage/MemoryAsyncStorage": "/Storage/MemoryAsyncStorage"
 			},
 			"run": [
 				"/test/browser/tests/Cache",
@@ -26,7 +27,9 @@
 				"/test/browser/tests/Storage/Sync/BrowserLocalStorage",
 				"/test/browser/tests/Storage/Sync/FileStorage",
 				"/test/browser/tests/Storage/Sync/DevNullStorage",
-				"/test/browser/tests/Storage/Sync/MemoryStorage"
+				"/test/browser/tests/Storage/Sync/MemoryStorage",
+				"/test/browser/tests/Storage/Async/DevNullStorage",
+				"/test/browser/tests/Storage/Async/MemoryStorage"
 			]
 		}
 	}

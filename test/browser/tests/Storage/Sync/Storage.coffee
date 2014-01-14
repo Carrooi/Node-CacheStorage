@@ -30,17 +30,7 @@ describe 'SyncStorage', ->
 
 			setTimeout( ->
 				expect(storage.verify(meta)).to.be.true
-
-				stats = window.require.getStats(__filename)
-				oldStats = {}
-				oldStats[__filename] = stats
-				newStats = {}
-				newStats[window.require.resolve(__filename)] =
-					atime: stats.atime.getTime()
-					mtime: (new Date(stats.mtime.getTime())).setHours(stats.mtime.getHours() + 1)
-					ctime: stats.ctime.getTime()
-				window.require.__setStats(newStats)
-
+				changeFile(__filename)
 				expect(storage.verify(meta)).to.be.false
 				done()
 			, 100)
