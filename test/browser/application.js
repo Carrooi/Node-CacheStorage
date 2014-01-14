@@ -3095,11 +3095,11 @@
 	      if (this.async) {
 	        return this.storage.read(this.generateKey(key), function(data) {
 	          if (data === null && fallback !== null) {
-	            return _this.save(key, fallback, function(data) {
-	              return fn(data);
+	            return _this.save(key, fallback, function(err, data) {
+	              return fn(err, data);
 	            });
 	          } else {
-	            return fn(data);
+	            return fn(null, data);
 	          }
 	        });
 	      } else {
@@ -3130,12 +3130,12 @@
 	      if (this.async) {
 	        if (data === null) {
 	          this.storage.remove(key, function() {
-	            return fn(data);
+	            return fn(null, data);
 	          });
 	        } else {
 	          this.storage.parseDependencies(dependencies, function(dependencies) {
 	            return _this.storage.write(key, data, dependencies, function() {
-	              return fn(data);
+	              return fn(null, data);
 	            });
 	          });
 	        }
@@ -3153,14 +3153,18 @@
 	      if (fn == null) {
 	        fn = null;
 	      }
-	      return this.save(key, null, fn);
+	      return this.save(key, null, function() {
+	        return fn(null);
+	      });
 	    };
 	
 	    Cache.prototype.clean = function(conditions, fn) {
 	      if (fn == null) {
 	        fn = null;
 	      }
-	      this.storage.clean(conditions, fn);
+	      this.storage.clean(conditions, function() {
+	        return fn(null);
+	      });
 	      return this;
 	    };
 	
@@ -6741,14 +6745,14 @@
 	      });
 	      it('should not save true', function(done) {
 	        return cache.save('true', true, function() {
-	          return cache.load('true', function(data) {
+	          return cache.load('true', function(err, data) {
 	            expect(data).to.be["null"];
 	            return done();
 	          });
 	        });
 	      });
 	      it('should always return null', function(done) {
-	        return cache.load('true', function(data) {
+	        return cache.load('true', function(err, data) {
 	          expect(data).to.be["null"];
 	          return done();
 	        });
@@ -6756,7 +6760,7 @@
 	      it('should not save true and try to delete it', function(done) {
 	        return cache.save('true', true, function() {
 	          return cache.remove('true', function() {
-	            return cache.load('true', function(data) {
+	            return cache.load('true', function(err, data) {
 	              expect(data).to.be["null"];
 	              return done();
 	            });
@@ -6766,9 +6770,9 @@
 	      return it('should not save true to cache from fallback function in load', function(done) {
 	        return cache.load('true', function() {
 	          return true;
-	        }, function(data) {
+	        }, function(err, data) {
 	          expect(data).to.be["true"];
-	          return cache.load('true', function(data) {
+	          return cache.load('true', function(err, data) {
 	            expect(data).to.be["null"];
 	            return done();
 	          });
@@ -6810,14 +6814,14 @@
 	    describe('saving/loading', function() {
 	      it('should save true and load it', function(done) {
 	        return cache.save('true', true, function() {
-	          return cache.load('true', function(data) {
+	          return cache.load('true', function(err, data) {
 	            expect(data).to.be["true"];
 	            return done();
 	          });
 	        });
 	      });
 	      it('should return null if item not exists', function(done) {
-	        return cache.load('true', function(data) {
+	        return cache.load('true', function(err, data) {
 	          expect(data).to.be["null"];
 	          return done();
 	        });
@@ -6825,7 +6829,7 @@
 	      it('should save true and delete it', function(done) {
 	        return cache.save('true', true, function() {
 	          return cache.remove('true', function() {
-	            return cache.load('true', function(data) {
+	            return cache.load('true', function(err, data) {
 	              expect(data).to.be["null"];
 	              return done();
 	            });
@@ -6835,7 +6839,7 @@
 	      return it('should save true to cache from fallback function in load', function(done) {
 	        return cache.load('true', function() {
 	          return true;
-	        }, function(data) {
+	        }, function(err, data) {
 	          expect(data).to.be["true"];
 	          return done();
 	        });
@@ -6847,10 +6851,10 @@
 	          files: [__filename]
 	        }, function() {
 	          return setTimeout(function() {
-	            return cache.load('true', function(data) {
+	            return cache.load('true', function(err, data) {
 	              expect(data).to.be["true"];
 	              changeFile(__filename);
-	              return cache.load('true', function(data) {
+	              return cache.load('true', function(err, data) {
 	                expect(data).to.be["null"];
 	                return done();
 	              });
@@ -6872,7 +6876,7 @@
 	            tags: ['article']
 	          }, function() {
 	            return async.each(data, function(item, cb) {
-	              return cache.load(item[0], function(data) {
+	              return cache.load(item[0], function(err, data) {
 	                expect(data).to.be.equal(item[1]);
 	                return cb();
 	              });
@@ -6889,7 +6893,7 @@
 	          }
 	        }, function() {
 	          return setTimeout(function() {
-	            return cache.load('true', function(data) {
+	            return cache.load('true', function(err, data) {
 	              expect(data).to.be["null"];
 	              return done();
 	            });
@@ -6902,7 +6906,7 @@
 	            items: ['first']
 	          }, function() {
 	            return cache.remove('first', function() {
-	              return cache.load('true', function(data) {
+	              return cache.load('true', function(err, data) {
 	                expect(data).to.be["null"];
 	                return done();
 	              });
@@ -6920,9 +6924,9 @@
 	            return cache.clean({
 	              priority: 50
 	            }, function() {
-	              return cache.load('one', function(data) {
+	              return cache.load('one', function(err, data) {
 	                expect(data).to.be.equal('one');
-	                return cache.load('two', function(data) {
+	                return cache.load('two', function(err, data) {
 	                  expect(data).to.be["null"];
 	                  return done();
 	                });
@@ -6935,9 +6939,9 @@
 	        return cache.save('one', 'one', function() {
 	          return cache.save('two', 'two', function() {
 	            return cache.clean('all', function() {
-	              return cache.load('one', function(data) {
+	              return cache.load('one', function(err, data) {
 	                expect(data).to.be["null"];
-	                return cache.load('two', function(data) {
+	                return cache.load('two', function(err, data) {
 	                  expect(data).to.be["null"];
 	                  return done();
 	                });
@@ -7790,7 +7794,7 @@
 , 'async': function(exports, module) { module.exports = window.require('async/lib/async.js'); }
 
 });
-require.__setStats({"/lib/Storage/Sync/BrowserLocalStorage.js":{"atime":1389714776000,"mtime":1389714749000,"ctime":1389714749000},"/lib/Storage/Sync/Storage.js":{"atime":1389724941000,"mtime":1389724796000,"ctime":1389724796000},"/lib/Storage/Storage.js":{"atime":1389721873000,"mtime":1389721830000,"ctime":1389721830000},"moment/moment.js":{"atime":1389726647000,"mtime":1387832828000,"ctime":1389389769000},"/lib/Cache.js":{"atime":1389714061000,"mtime":1389714059000,"ctime":1389714059000},"fs-mock/lib/fs.js":{"atime":1389710368000,"mtime":1389273046000,"ctime":1389391420000},"fs-mock/lib/Stats.js":{"atime":1389710369000,"mtime":1389269301000,"ctime":1389391420000},"fs-mock/lib/Errors.js":{"atime":1389710369000,"mtime":1389269301000,"ctime":1389391420000},"fs-mock/lib/FSWatcher.js":{"atime":1389710369000,"mtime":1389269301000,"ctime":1389391420000},"escape-regexp/index.js":{"atime":1389710369000,"mtime":1345153109000,"ctime":1389391421000},"/lib/Storage/Async/DevNullStorage.js":{"atime":1389714776000,"mtime":1389714738000,"ctime":1389714738000},"/lib/Storage/Async/Storage.js":{"atime":1389738645000,"mtime":1389738641000,"ctime":1389738641000},"async/lib/async.js":{"atime":1389710368000,"mtime":1369727354000,"ctime":1389710356000},"/lib/Storage/Sync/DevNullStorage.js":{"atime":1389714776000,"mtime":1389714761000,"ctime":1389714761000},"/lib/Storage/Async/FileStorage.js":{"atime":1389740361000,"mtime":1389740358000,"ctime":1389740358000},"/lib/Storage/Sync/FileStorage.js":{"atime":1389740361000,"mtime":1389740358000,"ctime":1389740358000},"/lib/Storage/Async/MemoryStorage.js":{"atime":1389716628000,"mtime":1389716623000,"ctime":1389716623000},"/lib/Storage/Sync/MemoryStorage.js":{"atime":1389714776000,"mtime":1389714772000,"ctime":1389714772000},"/Storage/BrowserLocalStorage.js":{"atime":1389715435000,"mtime":1389715212000,"ctime":1389715212000},"/Storage/BrowserLocalSyncStorage.js":{"atime":1389715173000,"mtime":1389462062000,"ctime":1389715173000},"/Storage/DevNullAsyncStorage.js":{"atime":1389710368000,"mtime":1389462072000,"ctime":1389462072000},"/Storage/DevNullStorage.js":{"atime":1389710368000,"mtime":1389462081000,"ctime":1389462081000},"/Storage/DevNullSyncStorage.js":{"atime":1389710368000,"mtime":1389462092000,"ctime":1389462092000},"/Storage/FileAsyncStorage.js":{"atime":1389739930000,"mtime":1389739926000,"ctime":1389739926000},"/Storage/FileStorage.js":{"atime":1389715435000,"mtime":1389715263000,"ctime":1389715263000},"/Storage/FileSyncStorage.js":{"atime":1389715231000,"mtime":1389462097000,"ctime":1389715231000},"/Storage/MemoryAsyncStorage.js":{"atime":1389716582000,"mtime":1389716131000,"ctime":1389716131000},"/Storage/MemoryStorage.js":{"atime":1389715435000,"mtime":1389715313000,"ctime":1389715313000},"/Storage/MemorySyncStorage.js":{"atime":1389715275000,"mtime":1389462102000,"ctime":1389715275000},"/test/browser/tests/Cache.coffee":{"atime":1389710370000,"mtime":1383999743000,"ctime":1389463648000},"/test/browser/tests/Storage/Async/DevNullStorage.coffee":{"atime":1389738820000,"mtime":1389738816000,"ctime":1389738816000},"/test/browser/tests/Storage/Async/MemoryStorage.coffee":{"atime":1389739221000,"mtime":1389739216000,"ctime":1389739216000},"/test/browser/tests/Storage/Async/Storage.coffee":{"atime":1389739353000,"mtime":1389739258000,"ctime":1389739258000},"/test/browser/tests/Storage/Sync/BrowserLocalStorage.coffee":{"atime":1389739353000,"mtime":1389739326000,"ctime":1389739326000},"/test/browser/tests/Storage/Sync/DevNullStorage.coffee":{"atime":1389710370000,"mtime":1389462249000,"ctime":1389462249000},"/test/browser/tests/Storage/Sync/FileStorage.coffee":{"atime":1389715437000,"mtime":1389715426000,"ctime":1389715426000},"/test/browser/tests/Storage/Sync/MemoryStorage.coffee":{"atime":1389715437000,"mtime":1389715419000,"ctime":1389715419000},"/test/browser/tests/Storage/Sync/Storage.coffee":{"atime":1389739353000,"mtime":1389739345000,"ctime":1389739345000},"/package.json":{"atime":1389710353000,"mtime":1389639476000,"ctime":1389639476000},"moment/package.json":{"atime":1389710353000,"mtime":1389389769000,"ctime":1389389769000},"async/package.json":{"atime":1389710368000,"mtime":1389710356000,"ctime":1389710356000}});
+require.__setStats({"/lib/Storage/Sync/BrowserLocalStorage.js":{"atime":1389714776000,"mtime":1389714749000,"ctime":1389714749000},"/lib/Storage/Sync/Storage.js":{"atime":1389724941000,"mtime":1389724796000,"ctime":1389724796000},"/lib/Storage/Storage.js":{"atime":1389721873000,"mtime":1389721830000,"ctime":1389721830000},"moment/moment.js":{"atime":1389726647000,"mtime":1387832828000,"ctime":1389389769000},"/lib/Cache.js":{"atime":1389741846000,"mtime":1389741833000,"ctime":1389741833000},"fs-mock/lib/fs.js":{"atime":1389710368000,"mtime":1389273046000,"ctime":1389391420000},"fs-mock/lib/Stats.js":{"atime":1389710369000,"mtime":1389269301000,"ctime":1389391420000},"fs-mock/lib/Errors.js":{"atime":1389710369000,"mtime":1389269301000,"ctime":1389391420000},"fs-mock/lib/FSWatcher.js":{"atime":1389710369000,"mtime":1389269301000,"ctime":1389391420000},"escape-regexp/index.js":{"atime":1389710369000,"mtime":1345153109000,"ctime":1389391421000},"/lib/Storage/Async/DevNullStorage.js":{"atime":1389714776000,"mtime":1389714738000,"ctime":1389714738000},"/lib/Storage/Async/Storage.js":{"atime":1389738645000,"mtime":1389738641000,"ctime":1389738641000},"async/lib/async.js":{"atime":1389710368000,"mtime":1369727354000,"ctime":1389710356000},"/lib/Storage/Sync/DevNullStorage.js":{"atime":1389714776000,"mtime":1389714761000,"ctime":1389714761000},"/lib/Storage/Async/FileStorage.js":{"atime":1389740412000,"mtime":1389740373000,"ctime":1389740373000},"/lib/Storage/Sync/FileStorage.js":{"atime":1389740361000,"mtime":1389740358000,"ctime":1389740358000},"/lib/Storage/Async/MemoryStorage.js":{"atime":1389716628000,"mtime":1389716623000,"ctime":1389716623000},"/lib/Storage/Sync/MemoryStorage.js":{"atime":1389714776000,"mtime":1389714772000,"ctime":1389714772000},"/Storage/BrowserLocalStorage.js":{"atime":1389715435000,"mtime":1389715212000,"ctime":1389715212000},"/Storage/BrowserLocalSyncStorage.js":{"atime":1389715173000,"mtime":1389462062000,"ctime":1389715173000},"/Storage/DevNullAsyncStorage.js":{"atime":1389710368000,"mtime":1389462072000,"ctime":1389462072000},"/Storage/DevNullStorage.js":{"atime":1389710368000,"mtime":1389462081000,"ctime":1389462081000},"/Storage/DevNullSyncStorage.js":{"atime":1389710368000,"mtime":1389462092000,"ctime":1389462092000},"/Storage/FileAsyncStorage.js":{"atime":1389739930000,"mtime":1389739926000,"ctime":1389739926000},"/Storage/FileStorage.js":{"atime":1389715435000,"mtime":1389715263000,"ctime":1389715263000},"/Storage/FileSyncStorage.js":{"atime":1389715231000,"mtime":1389462097000,"ctime":1389715231000},"/Storage/MemoryAsyncStorage.js":{"atime":1389716582000,"mtime":1389716131000,"ctime":1389716131000},"/Storage/MemoryStorage.js":{"atime":1389715435000,"mtime":1389715313000,"ctime":1389715313000},"/Storage/MemorySyncStorage.js":{"atime":1389715275000,"mtime":1389462102000,"ctime":1389715275000},"/test/browser/tests/Cache.coffee":{"atime":1389710370000,"mtime":1383999743000,"ctime":1389463648000},"/test/browser/tests/Storage/Async/DevNullStorage.coffee":{"atime":1389741590000,"mtime":1389741520000,"ctime":1389741520000},"/test/browser/tests/Storage/Async/MemoryStorage.coffee":{"atime":1389741590000,"mtime":1389741582000,"ctime":1389741582000},"/test/browser/tests/Storage/Async/Storage.coffee":{"atime":1389739353000,"mtime":1389739258000,"ctime":1389739258000},"/test/browser/tests/Storage/Sync/BrowserLocalStorage.coffee":{"atime":1389739353000,"mtime":1389739326000,"ctime":1389739326000},"/test/browser/tests/Storage/Sync/DevNullStorage.coffee":{"atime":1389710370000,"mtime":1389462249000,"ctime":1389462249000},"/test/browser/tests/Storage/Sync/FileStorage.coffee":{"atime":1389715437000,"mtime":1389715426000,"ctime":1389715426000},"/test/browser/tests/Storage/Sync/MemoryStorage.coffee":{"atime":1389715437000,"mtime":1389715419000,"ctime":1389715419000},"/test/browser/tests/Storage/Sync/Storage.coffee":{"atime":1389739353000,"mtime":1389739345000,"ctime":1389739345000},"/package.json":{"atime":1389710353000,"mtime":1389639476000,"ctime":1389639476000},"moment/package.json":{"atime":1389710353000,"mtime":1389389769000,"ctime":1389389769000},"async/package.json":{"atime":1389710368000,"mtime":1389710356000,"ctime":1389710356000}});
 require.version = '5.5.1';
 
 /** run section **/

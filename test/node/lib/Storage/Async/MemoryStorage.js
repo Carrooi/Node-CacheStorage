@@ -30,14 +30,14 @@
     describe('saving/loading', function() {
       it('should save true and load it', function(done) {
         return cache.save('true', true, function() {
-          return cache.load('true', function(data) {
+          return cache.load('true', function(err, data) {
             expect(data).to.be["true"];
             return done();
           });
         });
       });
       it('should return null if item not exists', function(done) {
-        return cache.load('true', function(data) {
+        return cache.load('true', function(err, data) {
           expect(data).to.be["null"];
           return done();
         });
@@ -45,7 +45,7 @@
       it('should save true and delete it', function(done) {
         return cache.save('true', true, function() {
           return cache.remove('true', function() {
-            return cache.load('true', function(data) {
+            return cache.load('true', function(err, data) {
               expect(data).to.be["null"];
               return done();
             });
@@ -55,7 +55,7 @@
       return it('should save true to cache from fallback function in load', function(done) {
         return cache.load('true', function() {
           return true;
-        }, function(data) {
+        }, function(err, data) {
           expect(data).to.be["true"];
           return done();
         });
@@ -67,10 +67,10 @@
           files: ['/file']
         }, function() {
           return setTimeout(function() {
-            return cache.load('true', function(data) {
+            return cache.load('true', function(err, data) {
               expect(data).to.be["true"];
               fs.writeFileSync('/file', '');
-              return cache.load('true', function(data) {
+              return cache.load('true', function(err, data) {
                 expect(data).to.be["null"];
                 return done();
               });
@@ -92,7 +92,7 @@
             tags: ['article']
           }, function() {
             return async.each(data, function(item, cb) {
-              return cache.load(item[0], function(data) {
+              return cache.load(item[0], function(err, data) {
                 expect(data).to.be.equal(item[1]);
                 return cb();
               });
@@ -109,7 +109,7 @@
           }
         }, function() {
           return setTimeout(function() {
-            return cache.load('true', function(data) {
+            return cache.load('true', function(err, data) {
               expect(data).to.be["null"];
               return done();
             });
@@ -122,7 +122,7 @@
             items: ['first']
           }, function() {
             return cache.remove('first', function() {
-              return cache.load('true', function(data) {
+              return cache.load('true', function(err, data) {
                 expect(data).to.be["null"];
                 return done();
               });
@@ -140,9 +140,9 @@
             return cache.clean({
               priority: 50
             }, function() {
-              return cache.load('one', function(data) {
+              return cache.load('one', function(err, data) {
                 expect(data).to.be.equal('one');
-                return cache.load('two', function(data) {
+                return cache.load('two', function(err, data) {
                   expect(data).to.be["null"];
                   return done();
                 });
@@ -155,9 +155,9 @@
         return cache.save('one', 'one', function() {
           return cache.save('two', 'two', function() {
             return cache.clean('all', function() {
-              return cache.load('one', function(data) {
+              return cache.load('one', function(err, data) {
                 expect(data).to.be["null"];
-                return cache.load('two', function(data) {
+                return cache.load('two', function(err, data) {
                   expect(data).to.be["null"];
                   return done();
                 });

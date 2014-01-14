@@ -17,14 +17,14 @@
       });
       it('should not save true', function(done) {
         return cache.save('true', true, function() {
-          return cache.load('true', function(data) {
+          return cache.load('true', function(err, data) {
             expect(data).to.be["null"];
             return done();
           });
         });
       });
       it('should always return null', function(done) {
-        return cache.load('true', function(data) {
+        return cache.load('true', function(err, data) {
           expect(data).to.be["null"];
           return done();
         });
@@ -32,7 +32,7 @@
       it('should not save true and try to delete it', function(done) {
         return cache.save('true', true, function() {
           return cache.remove('true', function() {
-            return cache.load('true', function(data) {
+            return cache.load('true', function(err, data) {
               expect(data).to.be["null"];
               return done();
             });
@@ -42,9 +42,9 @@
       return it('should not save true to cache from fallback function in load', function(done) {
         return cache.load('true', function() {
           return true;
-        }, function(data) {
+        }, function(err, data) {
           expect(data).to.be["true"];
-          return cache.load('true', function(data) {
+          return cache.load('true', function(err, data) {
             expect(data).to.be["null"];
             return done();
           });

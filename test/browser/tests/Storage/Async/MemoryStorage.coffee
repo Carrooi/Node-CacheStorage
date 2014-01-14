@@ -15,26 +15,26 @@ describe 'MemoryAsyncStorage', ->
 
 		it 'should save true and load it', (done) ->
 			cache.save 'true', true, ->
-				cache.load 'true', (data) ->
+				cache.load 'true', (err, data) ->
 					expect(data).to.be.true
 					done()
 
 		it 'should return null if item not exists', (done) ->
-			cache.load 'true', (data) ->
+			cache.load 'true', (err, data) ->
 				expect(data).to.be.null
 				done()
 
 		it 'should save true and delete it', (done) ->
 			cache.save 'true', true, ->
 				cache.remove 'true', ->
-					cache.load 'true', (data) ->
+					cache.load 'true', (err, data) ->
 						expect(data).to.be.null
 						done()
 
 		it 'should save true to cache from fallback function in load', (done) ->
 			cache.load 'true', ->
 				return true
-			, (data) ->
+			, (err, data) ->
 				expect(data).to.be.true
 				done()
 
@@ -43,10 +43,10 @@ describe 'MemoryAsyncStorage', ->
 		it 'should expire "true" value after file is changed', (done) ->
 			cache.save 'true', true, {files: [__filename]}, ->
 				setTimeout( ->
-					cache.load 'true', (data) ->
+					cache.load 'true', (err, data) ->
 						expect(data).to.be.true
 						changeFile(__filename)
-						cache.load 'true', (data) ->
+						cache.load 'true', (err, data) ->
 							expect(data).to.be.null
 							done()
 				, 100)
@@ -63,7 +63,7 @@ describe 'MemoryAsyncStorage', ->
 			, ->
 				cache.clean(tags: ['article'], ->
 					async.each(data, (item, cb) ->
-						cache.load item[0], (data) ->
+						cache.load item[0], (err, data) ->
 							expect(data).to.be.equal(item[1])
 							cb()
 					, ->
@@ -75,7 +75,7 @@ describe 'MemoryAsyncStorage', ->
 		it 'should expire "true" value after 1 second"', (done) ->
 			cache.save 'true', true, {expire: {seconds: 1}}, ->
 				setTimeout( ->
-					cache.load 'true', (data) ->
+					cache.load 'true', (err, data) ->
 						expect(data).to.be.null
 						done()
 				, 1100)
@@ -84,7 +84,7 @@ describe 'MemoryAsyncStorage', ->
 			cache.save 'first', 'first', ->
 				cache.save 'true', true, {items: ['first']}, ->
 					cache.remove 'first', ->
-						cache.load 'true', (data) ->
+						cache.load 'true', (err, data) ->
 							expect(data).to.be.null
 							done()
 
@@ -92,9 +92,9 @@ describe 'MemoryAsyncStorage', ->
 			cache.save 'one', 'one', {priority: 100}, ->
 				cache.save 'two', 'two', {priority: 10}, ->
 					cache.clean {priority: 50}, ->
-						cache.load 'one', (data) ->
+						cache.load 'one', (err, data) ->
 							expect(data).to.be.equal('one')
-							cache.load 'two', (data) ->
+							cache.load 'two', (err, data) ->
 								expect(data).to.be.null
 								done()
 
@@ -102,8 +102,8 @@ describe 'MemoryAsyncStorage', ->
 			cache.save 'one', 'one', ->
 				cache.save 'two', 'two', ->
 					cache.clean 'all', ->
-						cache.load 'one', (data) ->
+						cache.load 'one', (err, data) ->
 							expect(data).to.be.null
-							cache.load 'two', (data) ->
+							cache.load 'two', (err, data) ->
 								expect(data).to.be.null
 								done()

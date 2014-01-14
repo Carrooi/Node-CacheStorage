@@ -13,27 +13,27 @@ describe 'DevNullAsyncStorage', ->
 
 		it 'should not save true', (done) ->
 			cache.save 'true', true, ->
-				cache.load 'true', (data) ->
+				cache.load 'true', (err, data) ->
 					expect(data).to.be.null
 					done()
 
 		it 'should always return null', (done) ->
-			cache.load 'true', (data) ->
+			cache.load 'true', (err, data) ->
 				expect(data).to.be.null
 				done()
 
 		it 'should not save true and try to delete it', (done) ->
 			cache.save 'true', true, ->
 				cache.remove 'true', ->
-					cache.load 'true', (data) ->
+					cache.load 'true', (err, data) ->
 						expect(data).to.be.null
 						done()
 
 		it 'should not save true to cache from fallback function in load', (done) ->
 			cache.load 'true', ->
 				return true
-			, (data) ->
+			, (err, data) ->
 				expect(data).to.be.true
-				cache.load 'true', (data) ->
+				cache.load 'true', (err, data) ->
 					expect(data).to.be.null
 					done()

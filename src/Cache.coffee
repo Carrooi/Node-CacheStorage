@@ -74,11 +74,11 @@ class Cache
 		if @async
 			@storage.read(@generateKey(key), (data) =>
 				if data == null && fallback != null
-					@save(key, fallback, (data) ->
-						fn(data)
+					@save(key, fallback, (err, data) ->
+						fn(err, data)
 					)
 				else
-					fn(data)
+					fn(null, data)
 			)
 		else
 			data = @storage.read(@generateKey(key))
@@ -100,12 +100,12 @@ class Cache
 		if @async
 			if data == null
 				@storage.remove(key, ->
-					fn(data)
+					fn(null, data)
 				)
 			else
 				@storage.parseDependencies(dependencies, (dependencies) =>
 					@storage.write(key, data, dependencies, ->
-						fn(data)
+						fn(null, data)
 					)
 				)
 		else
@@ -118,11 +118,15 @@ class Cache
 
 
 	remove: (key, fn = null) ->
-		return @save(key, null, fn)
+		return @save(key, null, ->
+			fn(null)
+		)
 
 
 	clean: (conditions, fn = null) ->
-		@storage.clean(conditions, fn)
+		@storage.clean(conditions, ->
+			fn(null)
+		)
 		return @
 
 
