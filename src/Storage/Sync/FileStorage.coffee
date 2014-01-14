@@ -7,8 +7,6 @@ path = null
 class FileStorage extends Storage
 
 
-	async: false
-
 	directory: null
 
 	allData: null

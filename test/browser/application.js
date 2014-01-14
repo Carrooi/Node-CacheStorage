@@ -214,8 +214,6 @@
 	
 	    BrowserLocalStorage.TEST_VALUE = '__--cache-storage--__';
 	
-	    BrowserLocalStorage.prototype.async = false;
-	
 	    BrowserLocalStorage.prototype.allData = null;
 	
 	    BrowserLocalStorage.prototype.data = null;
@@ -4712,8 +4710,6 @@
 	      return _ref;
 	    }
 	
-	    DevNullStorage.prototype.async = true;
-	
 	    DevNullStorage.prototype.getData = function(fn) {
 	      fn({});
 	      return null;
@@ -6120,8 +6116,6 @@
 	      return _ref;
 	    }
 	
-	    DevNullStorage.prototype.async = false;
-	
 	    DevNullStorage.prototype.getData = function() {
 	      return {};
 	    };
@@ -6186,8 +6180,6 @@
 	
 	  FileStorage = (function(_super) {
 	    __extends(FileStorage, _super);
-	
-	    FileStorage.prototype.async = false;
 	
 	    FileStorage.prototype.directory = null;
 	
@@ -6297,8 +6289,6 @@
 	      _ref = MemoryStorage.__super__.constructor.apply(this, arguments);
 	      return _ref;
 	    }
-	
-	    MemoryStorage.prototype.async = false;
 	
 	    MemoryStorage.prototype.data = null;
 	
@@ -7046,7 +7036,7 @@
 , 'async': function(exports, module) { module.exports = window.require('async/lib/async.js'); }
 
 });
-require.__setStats({"/lib/Storage/Sync/BrowserLocalStorage.js":{"atime":1389710368000,"mtime":1389710339000,"ctime":1389710339000},"/lib/Storage/Sync/Storage.js":{"atime":1389710368000,"mtime":1389710339000,"ctime":1389710339000},"/lib/Storage/Storage.js":{"atime":1389710368000,"mtime":1389710339000,"ctime":1389710339000},"moment/moment.js":{"atime":1389639277000,"mtime":1387832828000,"ctime":1389389769000},"/lib/Cache.js":{"atime":1389714061000,"mtime":1389714059000,"ctime":1389714059000},"fs-mock/lib/fs.js":{"atime":1389710368000,"mtime":1389273046000,"ctime":1389391420000},"fs-mock/lib/Stats.js":{"atime":1389710369000,"mtime":1389269301000,"ctime":1389391420000},"fs-mock/lib/Errors.js":{"atime":1389710369000,"mtime":1389269301000,"ctime":1389391420000},"fs-mock/lib/FSWatcher.js":{"atime":1389710369000,"mtime":1389269301000,"ctime":1389391420000},"escape-regexp/index.js":{"atime":1389710369000,"mtime":1345153109000,"ctime":1389391421000},"/lib/Storage/Async/DevNullStorage.js":{"atime":1389710368000,"mtime":1389710339000,"ctime":1389710339000},"/lib/Storage/Async/Storage.js":{"atime":1389714061000,"mtime":1389713968000,"ctime":1389713968000},"async/lib/async.js":{"atime":1389710368000,"mtime":1369727354000,"ctime":1389710356000},"/lib/Storage/Sync/DevNullStorage.js":{"atime":1389710368000,"mtime":1389710339000,"ctime":1389710339000},"/lib/Storage/Sync/FileStorage.js":{"atime":1389710368000,"mtime":1389710339000,"ctime":1389710339000},"/lib/Storage/Sync/MemoryStorage.js":{"atime":1389710368000,"mtime":1389710339000,"ctime":1389710339000},"/Storage/BrowserLocalStorage.js":{"atime":1389710368000,"mtime":1389462062000,"ctime":1389462062000},"/Storage/DevNullAsyncStorage.js":{"atime":1389710368000,"mtime":1389462072000,"ctime":1389462072000},"/Storage/DevNullStorage.js":{"atime":1389710368000,"mtime":1389462081000,"ctime":1389462081000},"/Storage/DevNullSyncStorage.js":{"atime":1389710368000,"mtime":1389462092000,"ctime":1389462092000},"/Storage/FileStorage.js":{"atime":1389710368000,"mtime":1389462097000,"ctime":1389462097000},"/Storage/MemoryStorage.js":{"atime":1389710368000,"mtime":1389462102000,"ctime":1389462102000},"/test/browser/tests/Cache.coffee":{"atime":1389710370000,"mtime":1383999743000,"ctime":1389463648000},"/test/browser/tests/Storage/Sync/BrowserLocalStorage.coffee":{"atime":1389710370000,"mtime":1389464183000,"ctime":1389464183000},"/test/browser/tests/Storage/Sync/DevNullStorage.coffee":{"atime":1389710370000,"mtime":1389462249000,"ctime":1389462249000},"/test/browser/tests/Storage/Sync/FileStorage.coffee":{"atime":1389710370000,"mtime":1383999743000,"ctime":1389462237000},"/test/browser/tests/Storage/Sync/MemoryStorage.coffee":{"atime":1389710370000,"mtime":1383999743000,"ctime":1389462237000},"/package.json":{"atime":1389710353000,"mtime":1389639476000,"ctime":1389639476000},"moment/package.json":{"atime":1389710353000,"mtime":1389389769000,"ctime":1389389769000},"async/package.json":{"atime":1389710368000,"mtime":1389710356000,"ctime":1389710356000}});
+require.__setStats({"/lib/Storage/Sync/BrowserLocalStorage.js":{"atime":1389714776000,"mtime":1389714749000,"ctime":1389714749000},"/lib/Storage/Sync/Storage.js":{"atime":1389710368000,"mtime":1389710339000,"ctime":1389710339000},"/lib/Storage/Storage.js":{"atime":1389710368000,"mtime":1389710339000,"ctime":1389710339000},"moment/moment.js":{"atime":1389639277000,"mtime":1387832828000,"ctime":1389389769000},"/lib/Cache.js":{"atime":1389714061000,"mtime":1389714059000,"ctime":1389714059000},"fs-mock/lib/fs.js":{"atime":1389710368000,"mtime":1389273046000,"ctime":1389391420000},"fs-mock/lib/Stats.js":{"atime":1389710369000,"mtime":1389269301000,"ctime":1389391420000},"fs-mock/lib/Errors.js":{"atime":1389710369000,"mtime":1389269301000,"ctime":1389391420000},"fs-mock/lib/FSWatcher.js":{"atime":1389710369000,"mtime":1389269301000,"ctime":1389391420000},"escape-regexp/index.js":{"atime":1389710369000,"mtime":1345153109000,"ctime":1389391421000},"/lib/Storage/Async/DevNullStorage.js":{"atime":1389714776000,"mtime":1389714738000,"ctime":1389714738000},"/lib/Storage/Async/Storage.js":{"atime":1389714061000,"mtime":1389713968000,"ctime":1389713968000},"async/lib/async.js":{"atime":1389710368000,"mtime":1369727354000,"ctime":1389710356000},"/lib/Storage/Sync/DevNullStorage.js":{"atime":1389714776000,"mtime":1389714761000,"ctime":1389714761000},"/lib/Storage/Sync/FileStorage.js":{"atime":1389714776000,"mtime":1389714767000,"ctime":1389714767000},"/lib/Storage/Sync/MemoryStorage.js":{"atime":1389714776000,"mtime":1389714772000,"ctime":1389714772000},"/Storage/BrowserLocalStorage.js":{"atime":1389710368000,"mtime":1389462062000,"ctime":1389462062000},"/Storage/DevNullAsyncStorage.js":{"atime":1389710368000,"mtime":1389462072000,"ctime":1389462072000},"/Storage/DevNullStorage.js":{"atime":1389710368000,"mtime":1389462081000,"ctime":1389462081000},"/Storage/DevNullSyncStorage.js":{"atime":1389710368000,"mtime":1389462092000,"ctime":1389462092000},"/Storage/FileStorage.js":{"atime":1389710368000,"mtime":1389462097000,"ctime":1389462097000},"/Storage/MemoryStorage.js":{"atime":1389710368000,"mtime":1389462102000,"ctime":1389462102000},"/test/browser/tests/Cache.coffee":{"atime":1389710370000,"mtime":1383999743000,"ctime":1389463648000},"/test/browser/tests/Storage/Sync/BrowserLocalStorage.coffee":{"atime":1389710370000,"mtime":1389464183000,"ctime":1389464183000},"/test/browser/tests/Storage/Sync/DevNullStorage.coffee":{"atime":1389710370000,"mtime":1389462249000,"ctime":1389462249000},"/test/browser/tests/Storage/Sync/FileStorage.coffee":{"atime":1389710370000,"mtime":1383999743000,"ctime":1389462237000},"/test/browser/tests/Storage/Sync/MemoryStorage.coffee":{"atime":1389710370000,"mtime":1383999743000,"ctime":1389462237000},"/package.json":{"atime":1389710353000,"mtime":1389639476000,"ctime":1389639476000},"moment/package.json":{"atime":1389710353000,"mtime":1389389769000,"ctime":1389389769000},"async/package.json":{"atime":1389710368000,"mtime":1389710356000,"ctime":1389710356000}});
 require.version = '5.5.1';
 
 /** run section **/
