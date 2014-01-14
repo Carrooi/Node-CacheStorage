@@ -2,25 +2,34 @@
 	"packages": {
 		"tests": {
 			"base": "../../",
-			"application": "./test/browser/application.js",
+			"target": "./test/browser/application.js",
 			"modules": [
+				"./Storage/*.js",
 				"./lib/*.js",
 				"./test/browser/tests/*.coffee"
 			],
 			"aliases": {
 				"cache-storage": "/lib/Cache",
-				"cache-storage/Storage/BrowserLocalStorage": "/lib/Storage/BrowserLocalStorage",
-				"cache-storage/Storage/DevNullStorage": "/lib/Storage/DevNullStorage",
-				"cache-storage/Storage/FileStorage": "/lib/Storage/FileStorage",
-				"cache-storage/Storage/MemoryStorage": "/lib/Storage/MemoryStorage",
-				"cache-storage/Storage/Storage": "/lib/Storage/Storage"
+				"cache-storage/lib/Storage/Sync/Storage": "/lib/Storage/Sync/Storage",
+				"cache-storage/lib/Storage/Async/Storage": "/lib/Storage/Async/Storage",
+				"cache-storage/Storage/BrowserLocalSyncStorage": "/Storage/BrowserLocalSyncStorage",
+				"cache-storage/Storage/DevNullSyncStorage": "/Storage/DevNullSyncStorage",
+				"cache-storage/Storage/FileSyncStorage": "/Storage/FileSyncStorage",
+				"cache-storage/Storage/MemorySyncStorage": "/Storage/MemorySyncStorage",
+				"cache-storage/Storage/Storage": "/Storage/Storage",
+				"cache-storage/Storage/DevNullAsyncStorage": "/Storage/DevNullAsyncStorage",
+				"cache-storage/Storage/MemoryAsyncStorage": "/Storage/MemoryAsyncStorage"
 			},
 			"run": [
 				"/test/browser/tests/Cache",
-				"/test/browser/tests/BrowserLocalStorage",
-				"/test/browser/tests/FileStorage",
-				"/test/browser/tests/DevNullStorage",
-				"/test/browser/tests/MemoryStorage"
+				"/test/browser/tests/Storage/Sync/Storage",
+				"/test/browser/tests/Storage/Async/Storage",
+				"/test/browser/tests/Storage/Sync/BrowserLocalStorage",
+				"/test/browser/tests/Storage/Sync/FileStorage",
+				"/test/browser/tests/Storage/Sync/DevNullStorage",
+				"/test/browser/tests/Storage/Sync/MemoryStorage",
+				"/test/browser/tests/Storage/Async/DevNullStorage",
+				"/test/browser/tests/Storage/Async/MemoryStorage"
 			]
 		}
 	}

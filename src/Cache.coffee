@@ -1,3 +1,5 @@
+isFunction = (obj) -> return Object.prototype.toString.call(obj) == '[object Function]'
+
 class Cache
 
 
@@ -15,7 +17,11 @@ class Cache
 
 	@TIME_FORMAT = 'YYYY-MM-DD HH:mm'
 
+	@fs: null
+
 	storage: null
+
+	async: null
 
 	namespace: null
 
@@ -24,7 +30,28 @@ class Cache
 		if @storage !instanceof require('./Storage/Storage')
 			throw new Error 'Cache: storage must be instance of cache-storage/Storage/Storage'
 
+		@async = @storage.async
 		@storage.cache = @
+
+
+	@mockFs: (tree = {}, info = {}) ->
+		FS = require 'fs-mock'
+		Cache.fs = new FS(tree, info)
+		return Cache.fs
+
+
+	@restoreFs: ->
+		if typeof window != 'undefined'
+			throw new Error 'Testing with fs module is not allowed in browser.'
+
+		Cache.fs = require 'fs'
+
+
+	@getFs: ->
+		if Cache.fs == null
+			Cache.restoreFs()
+
+		return Cache.fs
 
 
 	generateKey: (key) ->
@@ -39,33 +66,67 @@ class Cache
 		return hash
 
 
-	load: (key, fallback = null) ->
-		data = @storage.read(@generateKey(key))
-		if data == null && fallback != null
-			return @save(key, fallback)
-		return data
+	load: (key, fallback = null, fn = null) ->
+		if @async && arguments.length == 2
+			fn = fallback
+			fallback = null
+
+		if @async
+			@storage.read(@generateKey(key), (data) =>
+				if data == null && fallback != null
+					@save(key, fallback, (err, data) ->
+						fn(err, data)
+					)
+				else
+					fn(null, data)
+			)
+		else
+			data = @storage.read(@generateKey(key))
+			if data == null && fallback != null
+				return @save(key, fallback)
+			return data
 
 
-	save: (key, data, dependencies = {}) ->
+	save: (key, data, dependencies = {}, fn = null) ->
+		if isFunction(dependencies)
+			fn = dependencies
+			dependencies = {}
+
 		key = @generateKey(key)
 
-		if Object.prototype.toString.call(data) == '[object Function]'
+		if isFunction(data)
 			data = data()
 
-		if data == null
-			@storage.remove(key)
+		if @async
+			if data == null
+				@storage.remove(key, ->
+					fn(null, data)
+				)
+			else
+				@storage.parseDependencies(dependencies, (dependencies) =>
+					@storage.write(key, data, dependencies, ->
+						fn(null, data)
+					)
+				)
 		else
-			@storage.write(key, data, @storage.parseDependencies(dependencies))
+			if data == null
+				@storage.remove(key)
+			else
+				@storage.write(key, data, @storage.parseDependencies(dependencies))
 
 		return data
 
 
-	remove: (key) ->
-		return @save(key, null)
+	remove: (key, fn = null) ->
+		return @save(key, null, ->
+			fn(null)
+		)
 
 
-	clean: (conditions) ->
-		@storage.clean(conditions)
+	clean: (conditions, fn = null) ->
+		@storage.clean(conditions, ->
+			fn(null)
+		)
 		return @
 
 

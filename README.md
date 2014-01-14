@@ -1,3 +1,7 @@
+[![NPM version](https://badge.fury.io/js/cache-storage.png)](http://badge.fury.io/js/cache-storage)
+[![Dependency Status](https://gemnasium.com/sakren/node-cache-storage.png)](https://gemnasium.com/sakren/node-cache-storage)
+[![Build Status](https://travis-ci.org/sakren/node-cache-storage.png?branch=master)](https://travis-ci.org/sakren/node-cache-storage)
+
 # cache-storage
 
 Advanced cache storage inspired by cache in [Nette framework](http://doc.nette.org/en/caching).
@@ -10,11 +14,13 @@ Can be also used in browser for example with [simq](https://npmjs.org/package/si
 $ npm install cache-storage
 ```
 
+Required node version: >= 0.9
+
 ## Creating cache
 
 ```
 var Cache = require('cache-storage');
-var FileStorage = require('cache-storage/Storage/FileStorage');
+var FileStorage = require('cache-storage/Storage/FileSyncStorage');
 
 var cache = new Cache(new FileStorage('./temp'), 'namespace');
 ```
@@ -24,22 +30,33 @@ more than one independent caches.
 
 ## Available storages
 
-* FileStorage (cache-storage/Storage/FileStorage - saving data to json files)
-* BrowserLocalStorage (cache-storage/Storage/BrowserLocalStorage - saving data to HTML5 local storage)
-* DevNullStorage (cache-storage/Storage/DevNullStorage - does not save anything and load always null)
-* MemoryStorage (cache-storage/Storage/MemoryStorage - saving data just into storage's class property)
+### Synchronous storages
+
+* FileSyncStorage (`cache-storage/Storage/FileSyncStorage` - saving data to json files)
+* BrowserLocalSyncStorage (`cache-storage/Storage/BrowserLocalSyncStorage` - saving data to HTML5 local storage)
+* DevNullSyncStorage (`cache-storage/Storage/DevNullSyncStorage` - does not save anything and load always null)
+* MemorySyncStorage (`cache-storage/Storage/MemorySyncStorage` - saving data just into storage's class property)
+
+### Asynchronouse storages
+
+* FileAsyncStorage (`cache-storage/Storage/FileAsyncStorage`)
+* DevNullAsyncStorage (`cache-storage/Storage/DevNullAsyncStorage`)
+* MemoryAsyncStorage (`cache-storage/Storage/MemoryAsyncStorage`)
 
 More storages will be added in future.
 
 ### Only node storages
 
-* FileStorage
+* `FileSyncStorage`
+* `FileAsyncStorage`
 
 ### Only browser storages
 
-* BrowserLocalStorage
+* `BrowserLocalSyncStorage`
 
 ## Loading & saving
+
+### Synchronous
 
 ```
 var data = cache.load('some_data');
@@ -63,7 +80,30 @@ var data = cache.load('some_data', function() {
 When no data were found, then fallback anonymous function is called and data from return statement are used.
 Cache.save function always return given data.
 
+### Asynchronous
+
+```
+cache.load('some_data', function(err, data) {
+	if (data === null) {
+		cache.save('some_data', 'some value of some_data', function(err, savedData) {
+			console.log(savedData);			// output: some value of some_data
+		});
+	}
+});
+```
+
+or
+```
+cache.load('some_data', function() {
+	return 'some value of some_data';
+}, function(data) {
+	console.log(data);		// output: some value of some_data
+});
+```
+
 ## Removing
+
+### Synchronous
 
 ```
 if (cache.load('some_data') !== null) {
@@ -71,6 +111,18 @@ if (cache.load('some_data') !== null) {
 
 	// other way: cache.save('some_data', null);
 }
+```
+
+### Asynchronous
+
+```
+cache.load('some_data', function(data) {
+	if (data !== null) {
+		cache.remove('some_data', function(err) {
+			console.log('some_data was removed');
+		}
+	}
+});
 ```
 
 ## Expiration
@@ -94,6 +146,8 @@ If you set files to save function, then that item will expire when some of given
 
 This type of expiration can be used also in browser, but only with [simq](https://npmjs.org/package/simq) and with allowed
 option `filesStats`. See at documentation of [simq](https://npmjs.org/package/simq).
+
+**Second argument in `clean` method is callback with possible error, this is used just for asynchronous storages.**
 
 ### Expiration by tags
 
