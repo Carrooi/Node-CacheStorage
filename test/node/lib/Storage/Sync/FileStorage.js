@@ -8,13 +8,13 @@
 
   Cache = require('../../../../../lib/Cache');
 
-  FileStorage = require('../../../../../Storage/FileStorage');
+  FileStorage = require('../../../../../Storage/FileSyncStorage');
 
   fs = null;
 
   cache = null;
 
-  describe('FileStorage', function() {
+  describe('FileSyncStorage', function() {
     beforeEach(function() {
       return fs = Cache.mockFs({
         'temp': {},

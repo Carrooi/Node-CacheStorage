@@ -10,12 +10,12 @@
 			],
 			"aliases": {
 				"cache-storage": "/lib/Cache",
-				"cache-storage/Storage/BrowserLocalStorage": "/Storage/BrowserLocalStorage",
+				"cache-storage/Storage/BrowserLocalSyncStorage": "/Storage/BrowserLocalSyncStorage",
 				"cache-storage/Storage/DevNullSyncStorage": "/Storage/DevNullSyncStorage",
-				"cache-storage/Storage/DevNullStorage": "/Storage/DevNullStorage",
-				"cache-storage/Storage/FileStorage": "/Storage/FileStorage",
-				"cache-storage/Storage/MemoryStorage": "/Storage/MemoryStorage",
-				"cache-storage/Storage/Storage": "/Storage/Storage"
+				"cache-storage/Storage/FileSyncStorage": "/Storage/FileSyncStorage",
+				"cache-storage/Storage/MemorySyncStorage": "/Storage/MemorySyncStorage",
+				"cache-storage/Storage/Storage": "/Storage/Storage",
+				"cache-storage/Storage/DevNullAsyncStorage": "/Storage/DevNullAsyncStorage"
 			},
 			"run": [
 				"/test/browser/tests/Cache",

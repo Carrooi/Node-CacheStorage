@@ -1,10 +1,10 @@
 
 Cache = require 'cache-storage'
-MemoryStorage = require 'cache-storage/Storage/MemoryStorage'
+MemoryStorage = require 'cache-storage/Storage/MemorySyncStorage'
 
 cache = null
 
-describe 'MemoryStorage', ->
+describe 'MemorySyncStorage', ->
 
 	beforeEach( ->
 		cache = new Cache(new MemoryStorage, 'test')

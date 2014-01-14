@@ -1,12 +1,12 @@
 
 Cache = require 'cache-storage'
-BrowserLocalStorage = require 'cache-storage/Storage/BrowserLocalStorage'
+BrowserLocalStorage = require 'cache-storage/Storage/BrowserLocalSyncStorage'
 
 cache = null
 
 originalSimqVersion = window.require.version
 
-describe 'BrowserLocalStorage', ->
+describe 'BrowserLocalsyncStorage', ->
 
 	beforeEach( ->
 		cache = new Cache(new BrowserLocalStorage)

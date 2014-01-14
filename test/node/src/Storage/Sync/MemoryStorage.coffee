@@ -4,11 +4,11 @@ path = require 'path'
 fs = null
 
 Cache = require '../../../../../lib/Cache'
-MemoryStorage = require '../../../../../Storage/MemoryStorage'
+MemoryStorage = require '../../../../../Storage/MemorySyncStorage'
 
 cache = null
 
-describe 'MemoryStorage', ->
+describe 'MemorySyncStorage', ->
 
 	beforeEach( ->
 		fs = Cache.mockFs(

@@ -2,12 +2,12 @@ expect = require('chai').expect
 path = require 'path'
 
 Cache = require '../../../../../lib/Cache'
-FileStorage = require '../../../../../Storage/FileStorage'
+FileStorage = require '../../../../../Storage/FileSyncStorage'
 
 fs = null
 cache = null
 
-describe 'FileStorage', ->
+describe 'FileSyncStorage', ->
 
 	beforeEach( ->
 		fs = Cache.mockFs(
