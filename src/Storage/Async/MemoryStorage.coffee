@@ -24,7 +24,7 @@ class MemoryStorage extends Storage
 		return null
 
 
-	writeData: (@data, @meta) ->
+	writeData: (@data, @meta, fn) ->
 		fn()
 		return @
 
