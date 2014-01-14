@@ -199,6 +199,7 @@ cache.clean(Cache.ALL);		// or cache.clean('all');
 $ npm test
 ```
 
+
 ## Changelog
 
 * 1.4.1
