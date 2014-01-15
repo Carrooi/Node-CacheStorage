@@ -12,7 +12,6 @@ class DevNullStorage extends Storage
 
 
 	writeData: (data, meta) ->
-		return @
 
 
 	read: (key) ->
@@ -20,11 +19,9 @@ class DevNullStorage extends Storage
 
 
 	write: (key, data, dependencies = {}) ->
-		return @
 
 
 	remove: (key) ->
-		return @
 
 
 module.exports = DevNullStorage

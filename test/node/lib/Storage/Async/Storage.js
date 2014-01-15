@@ -29,7 +29,7 @@
     });
     describe('#verify()', function() {
       it('should just return true', function(done) {
-        return storage.verify('random variable', function(state) {
+        return storage.verify('random variable', function(err, state) {
           expect(state).to.be["true"];
           return done();
         });
@@ -37,20 +37,20 @@
       it('should return false if meta expired', function(done) {
         return storage.verify({
           expire: (new Date).getTime() - 200
-        }, function(state) {
+        }, function(err, state) {
           expect(state).to.be["false"];
           return done();
         });
       });
       it('should return false if dependent meta expired', function(done) {
         storage.findMeta = function(key, fn) {
-          return fn({
+          return fn(null, {
             expire: (new Date).getTime() - 200
           });
         };
         return storage.verify({
           items: ['test']
-        }, function(state) {
+        }, function(err, state) {
           expect(state).to.be["false"];
           return done();
         });
@@ -63,10 +63,10 @@
           }
         };
         return setTimeout(function() {
-          return storage.verify(meta, function(state) {
+          return storage.verify(meta, function(err, state) {
             expect(state).to.be["true"];
             fs.writeFileSync('/file', '');
-            return storage.verify(meta, function(state) {
+            return storage.verify(meta, function(err, state) {
               expect(state).to.be["false"];
               return done();
             });
@@ -76,7 +76,7 @@
     });
     return describe('#parseDependencies()', function() {
       it('should return empty object for unknown type of dependencies', function(done) {
-        return storage.parseDependencies('random variable', function(dependencies) {
+        return storage.parseDependencies('random variable', function(err, dependencies) {
           expect(dependencies).to.be.eql({});
           return done();
         });
@@ -84,7 +84,7 @@
       it('should add priority into dependencies', function(done) {
         return storage.parseDependencies({
           priority: 100
-        }, function(dependencies) {
+        }, function(err, dependencies) {
           expect(dependencies).to.be.eql({
             priority: 100
           });
@@ -94,7 +94,7 @@
       it('should add tags into dependencies', function(done) {
         return storage.parseDependencies({
           tags: ['comment', 'article']
-        }, function(dependencies) {
+        }, function(err, dependencies) {
           expect(dependencies).to.be.eql({
             tags: ['comment', 'article']
           });
@@ -104,7 +104,7 @@
       it('should add dependent item into dependencies', function(done) {
         return storage.parseDependencies({
           items: ['first', 'second']
-        }, function(dependencies) {
+        }, function(err, dependencies) {
           expect(dependencies).to.be.eql({
             items: [cache.generateKey('first'), cache.generateKey('second')]
           });
@@ -116,7 +116,7 @@
         time = '2014-01-14 20:10';
         return storage.parseDependencies({
           expire: time
-        }, function(dependencies) {
+        }, function(err, dependencies) {
           expect(dependencies).to.be.eql({
             expire: moment(time, Cache.TIME_FORMAT).valueOf()
           });
@@ -128,7 +128,7 @@
         time = fs.statSync('/file').mtime.getTime();
         return storage.parseDependencies({
           files: ['/file']
-        }, function(dependencies) {
+        }, function(err, dependencies) {
           expect(dependencies).to.be.eql({
             files: {
               '/file': time

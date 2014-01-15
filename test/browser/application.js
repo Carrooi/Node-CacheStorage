@@ -275,11 +275,10 @@
 	    BrowserLocalStorage.prototype.writeData = function(data, meta) {
 	      this.data = data;
 	      this.meta = meta;
-	      localStorage.setItem(this.getName(), JSON.stringify({
+	      return localStorage.setItem(this.getName(), JSON.stringify({
 	        data: this.data,
 	        meta: this.meta
 	      }));
-	      return this;
 	    };
 	
 	    return BrowserLocalStorage;
@@ -355,8 +354,7 @@
 	      all[key] = data;
 	      meta = this.getMeta();
 	      meta[key] = dependencies;
-	      this.writeData(all, meta);
-	      return this;
+	      return this.writeData(all, meta);
 	    };
 	
 	    Storage.prototype.remove = function(key) {
@@ -367,8 +365,7 @@
 	        delete data[key];
 	        delete meta[key];
 	      }
-	      this.writeData(data, meta);
-	      return this;
+	      return this.writeData(data, meta);
 	    };
 	
 	    Storage.prototype.removeAll = function() {
@@ -376,11 +373,11 @@
 	    };
 	
 	    Storage.prototype.clean = function(conditions) {
-	      var key, tag, type, typeFn, _i, _j, _k, _len, _len1, _len2, _ref1, _ref2, _ref3;
+	      var key, tag, type, typeFn, _i, _j, _k, _len, _len1, _len2, _ref1, _ref2, _ref3, _results;
 	      typeFn = Object.prototype.toString;
 	      type = typeFn.call(conditions);
 	      if (conditions === Cache.ALL) {
-	        this.removeAll();
+	        return this.removeAll();
 	      } else if (type === '[object Object]') {
 	        if (typeof conditions[Cache.TAGS] !== 'undefined') {
 	          if (typeFn(conditions[Cache.TAGS]) === '[object String]') {
@@ -398,13 +395,14 @@
 	        }
 	        if (typeof conditions[Cache.PRIORITY] !== 'undefined') {
 	          _ref3 = this.findKeysByPriority(conditions[Cache.PRIORITY]);
+	          _results = [];
 	          for (_k = 0, _len2 = _ref3.length; _k < _len2; _k++) {
 	            key = _ref3[_k];
-	            this.remove(key);
+	            _results.push(this.remove(key));
 	          }
+	          return _results;
 	        }
 	      }
-	      return this;
 	    };
 	
 	    Storage.prototype.findMeta = function(key) {
@@ -3097,8 +3095,10 @@
 	        fallback = null;
 	      }
 	      if (this.async) {
-	        return this.storage.read(this.generateKey(key), function(data) {
-	          if (data === null && fallback !== null) {
+	        return this.storage.read(this.generateKey(key), function(err, data) {
+	          if (err) {
+	            return fn(err, null);
+	          } else if (data === null && fallback !== null) {
 	            return _this.save(key, fallback, function(err, data) {
 	              return fn(err, data);
 	            });
@@ -3133,14 +3133,26 @@
 	      }
 	      if (this.async) {
 	        if (data === null) {
-	          this.storage.remove(key, function() {
-	            return fn(null, data);
+	          this.storage.remove(key, function(err) {
+	            if (err) {
+	              return fn(err, null);
+	            } else {
+	              return fn(null, data);
+	            }
 	          });
 	        } else {
-	          this.storage.parseDependencies(dependencies, function(dependencies) {
-	            return _this.storage.write(key, data, dependencies, function() {
-	              return fn(null, data);
-	            });
+	          this.storage.parseDependencies(dependencies, function(err, dependencies) {
+	            if (err) {
+	              return fn(err, null);
+	            } else {
+	              return _this.storage.write(key, data, dependencies, function(err) {
+	                if (err) {
+	                  return fn(err, null);
+	                } else {
+	                  return fn(null, data);
+	                }
+	              });
+	            }
 	          });
 	        }
 	      } else {
@@ -3157,18 +3169,14 @@
 	      if (fn == null) {
 	        fn = null;
 	      }
-	      return this.save(key, null, function() {
-	        return fn(null);
-	      });
+	      return this.save(key, null, fn);
 	    };
 	
 	    Cache.prototype.clean = function(conditions, fn) {
 	      if (fn == null) {
 	        fn = null;
 	      }
-	      this.storage.clean(conditions, function() {
-	        return fn(null);
-	      });
+	      this.storage.clean(conditions, fn);
 	      return this;
 	    };
 	
@@ -4718,23 +4726,19 @@
 	    }
 	
 	    DevNullStorage.prototype.getData = function(fn) {
-	      fn({});
-	      return null;
+	      return fn(null, {});
 	    };
 	
 	    DevNullStorage.prototype.getMeta = function(fn) {
-	      fn({});
-	      return null;
+	      return fn(null, {});
 	    };
 	
 	    DevNullStorage.prototype.writeData = function(data, meta, fn) {
-	      fn();
-	      return this;
+	      return fn(null);
 	    };
 	
 	    DevNullStorage.prototype.read = function(key, fn) {
-	      fn(null);
-	      return null;
+	      return fn(null, null);
 	    };
 	
 	    DevNullStorage.prototype.write = function(key, data, dependencies, fn) {
@@ -4745,13 +4749,11 @@
 	        fn = dependencies;
 	        dependencies = {};
 	      }
-	      fn();
-	      return this;
+	      return fn(null);
 	    };
 	
 	    DevNullStorage.prototype.remove = function(key, fn) {
-	      fn();
-	      return this;
+	      return fn(null);
 	    };
 	
 	    return DevNullStorage;
@@ -4807,20 +4809,32 @@
 	
 	    Storage.prototype.read = function(key, fn) {
 	      var _this = this;
-	      return this.getData(function(data) {
-	        if (typeof data[key] === 'undefined') {
-	          return fn(null);
+	      return this.getData(function(err, data) {
+	        if (err) {
+	          return fn(err, null);
+	        } else if (typeof data[key] === 'undefined') {
+	          return fn(null, null);
 	        } else {
-	          return _this.findMeta(key, function(meta) {
-	            return _this.verify(meta, function(state) {
-	              if (state) {
-	                return fn(data[key]);
-	              } else {
-	                return _this.remove(key, function() {
-	                  return fn(null);
-	                });
-	              }
-	            });
+	          return _this.findMeta(key, function(err, meta) {
+	            if (err) {
+	              return fn(err, null);
+	            } else {
+	              return _this.verify(meta, function(err, state) {
+	                if (err) {
+	                  return fn(err, null);
+	                } else if (state) {
+	                  return fn(null, data[key]);
+	                } else {
+	                  return _this.remove(key, function(err) {
+	                    if (err) {
+	                      return fn(err, null);
+	                    } else {
+	                      return fn(null, null);
+	                    }
+	                  });
+	                }
+	              });
+	            }
 	          });
 	        }
 	      });
@@ -4831,29 +4845,41 @@
 	      if (dependencies == null) {
 	        dependencies = {};
 	      }
-	      return this.getData(function(all) {
-	        all[key] = data;
-	        return _this.getMeta(function(meta) {
-	          meta[key] = dependencies;
-	          return _this.writeData(all, meta, function() {
-	            return fn();
+	      return this.getData(function(err, all) {
+	        if (err) {
+	          return fn(err);
+	        } else {
+	          all[key] = data;
+	          return _this.getMeta(function(err, meta) {
+	            if (err) {
+	              return fn(err);
+	            } else {
+	              meta[key] = dependencies;
+	              return _this.writeData(all, meta, fn);
+	            }
 	          });
-	        });
+	        }
 	      });
 	    };
 	
 	    Storage.prototype.remove = function(key, fn) {
 	      var _this = this;
-	      return this.getData(function(data) {
-	        return _this.getMeta(function(meta) {
-	          if (typeof data[key] !== 'undefined') {
-	            delete data[key];
-	            delete meta[key];
-	          }
-	          return _this.writeData(data, meta, function() {
-	            return fn();
+	      return this.getData(function(err, data) {
+	        if (err) {
+	          return fn(err);
+	        } else {
+	          return _this.getMeta(function(err, meta) {
+	            if (err) {
+	              return fn(err);
+	            } else {
+	              if (typeof data[key] !== 'undefined') {
+	                delete data[key];
+	                delete meta[key];
+	              }
+	              return _this.writeData(data, meta, fn);
+	            }
 	          });
-	        });
+	        }
 	      });
 	    };
 	
@@ -4877,70 +4903,86 @@
 	        }
 	        removeKeys = function(keys) {
 	          return async.eachSeries(keys, function(key, cb) {
-	            return _this.remove(key, function() {
-	              return cb();
+	            return _this.remove(key, function(err) {
+	              return cb(err);
 	            });
-	          }, function() {
-	            return fn();
+	          }, function(err) {
+	            return fn(err);
 	          });
 	        };
 	        keys = [];
 	        async.eachSeries(conditions[Cache.TAGS], function(tag, cb) {
-	          return _this.findKeysByTag(tag, function(_keys) {
+	          return _this.findKeysByTag(tag, function(err, _keys) {
 	            keys = keys.concat(_keys);
-	            return cb();
+	            return cb(err);
 	          });
-	        }, function() {
-	          if (typeof conditions[Cache.PRIORITY] === 'undefined') {
+	        }, function(err) {
+	          if (err) {
+	            return fn(err);
+	          } else if (typeof conditions[Cache.PRIORITY] === 'undefined') {
 	            return removeKeys(keys);
 	          } else {
-	            return _this.findKeysByPriority(conditions[Cache.PRIORITY], function(_keys) {
-	              keys = keys.concat(_keys);
-	              return removeKeys(keys);
+	            return _this.findKeysByPriority(conditions[Cache.PRIORITY], function(err, _keys) {
+	              if (err) {
+	                return fn(err);
+	              } else {
+	                keys = keys.concat(_keys);
+	                return removeKeys(keys);
+	              }
 	            });
 	          }
 	        });
 	      } else {
-	        fn();
+	        fn(null);
 	      }
 	      return this;
 	    };
 	
 	    Storage.prototype.findMeta = function(key, fn) {
-	      return this.getMeta(function(meta) {
-	        if (typeof meta[key] !== 'undefined') {
-	          return fn(meta[key]);
+	      return this.getMeta(function(err, meta) {
+	        if (err) {
+	          return fn(err, null);
+	        } else if (typeof meta[key] !== 'undefined') {
+	          return fn(null, meta[key]);
 	        } else {
-	          return fn(null);
+	          return fn(null, null);
 	        }
 	      });
 	    };
 	
 	    Storage.prototype.findKeysByTag = function(tag, fn) {
-	      return this.getMeta(function(metas) {
+	      return this.getMeta(function(err, metas) {
 	        var key, meta, result;
-	        result = [];
-	        for (key in metas) {
-	          meta = metas[key];
-	          if (typeof meta[Cache.TAGS] !== 'undefined' && meta[Cache.TAGS].indexOf(tag) !== -1) {
-	            result.push(key);
+	        if (err) {
+	          return fn(err, null);
+	        } else {
+	          result = [];
+	          for (key in metas) {
+	            meta = metas[key];
+	            if (typeof meta[Cache.TAGS] !== 'undefined' && meta[Cache.TAGS].indexOf(tag) !== -1) {
+	              result.push(key);
+	            }
 	          }
+	          return fn(null, result);
 	        }
-	        return fn(result);
 	      });
 	    };
 	
 	    Storage.prototype.findKeysByPriority = function(priority, fn) {
-	      return this.getMeta(function(metas) {
+	      return this.getMeta(function(err, metas) {
 	        var key, meta, result;
-	        result = [];
-	        for (key in metas) {
-	          meta = metas[key];
-	          if (typeof meta[Cache.PRIORITY] !== 'undefined' && meta[Cache.PRIORITY] <= priority) {
-	            result.push(key);
+	        if (err) {
+	          return fn(err, null);
+	        } else {
+	          result = [];
+	          for (key in metas) {
+	            meta = metas[key];
+	            if (typeof meta[Cache.PRIORITY] !== 'undefined' && meta[Cache.PRIORITY] <= priority) {
+	              result.push(key);
+	            }
 	          }
+	          return fn(null, result);
 	        }
-	        return fn(result);
 	      });
 	    };
 	
@@ -4951,7 +4993,7 @@
 	      if (typefn.call(meta) === '[object Object]') {
 	        if (typeof meta[Cache.EXPIRE] !== 'undefined') {
 	          if (moment().valueOf() >= meta[Cache.EXPIRE]) {
-	            fn(false);
+	            fn(null, false);
 	            return null;
 	          }
 	        }
@@ -4959,14 +5001,20 @@
 	          meta[Cache.ITEMS] = [];
 	        }
 	        return async.eachSeries(meta[Cache.ITEMS], function(item, cb) {
-	          return _this.findMeta(item, function(meta) {
-	            if (meta === null) {
-	              fn(false);
+	          return _this.findMeta(item, function(err, meta) {
+	            if (err) {
+	              fn(err, null);
+	              return cb(new Error('Fake error'));
+	            } else if (meta === null) {
+	              fn(null, false);
 	              return cb(new Error('Fake error'));
 	            } else if (meta !== null) {
-	              return _this.verify(meta, function(state) {
-	                if (state === false) {
-	                  fn(false);
+	              return _this.verify(meta, function(err, state) {
+	                if (err) {
+	                  fn(err, null);
+	                  return cb(new Error('Fake error'));
+	                } else if (state === false) {
+	                  fn(null, false);
 	                  return cb(new Error('Fake error'));
 	                } else {
 	                  return cb();
@@ -4992,11 +5040,11 @@
 	                  throw new Error('File stats are disabled in your simq configuration. Can not get stats for ' + file + '.');
 	                }
 	                if (window.require.getStats(file).mtime.getTime() !== time) {
-	                  fn(false);
+	                  fn(null, false);
 	                  return null;
 	                }
 	              }
-	              return fn(true);
+	              return fn(null, true);
 	            } else {
 	              files = [];
 	              _ref2 = meta[Cache.FILES];
@@ -5017,7 +5065,7 @@
 	                    return cb(err);
 	                  } else {
 	                    if ((new Date(stats.mtime)).getTime() !== item.time) {
-	                      fn(false);
+	                      fn(null, false);
 	                      return cb(new Error('Fake error'));
 	                    } else {
 	                      return cb();
@@ -5028,21 +5076,21 @@
 	                if (err && err.message === 'Fake error') {
 	
 	                } else if (err) {
-	                  throw err;
+	                  return fn(err, null);
 	                } else {
-	                  return fn(true);
+	                  return fn(null, true);
 	                }
 	              });
 	            }
 	          }
 	        });
 	      } else {
-	        return fn(true);
+	        return fn(null, true);
 	      }
 	    };
 	
 	    Storage.prototype.parseDependencies = function(dependencies, fn) {
-	      var file, files, item, mtime, result, time, typefn, _i, _j, _k, _len, _len1, _len2, _ref1, _ref2, _ref3;
+	      var file, files, item, mtime, result, time, typefn, _i, _j, _len, _len1, _ref1, _ref2;
 	      typefn = Object.prototype.toString;
 	      result = {};
 	      if (typefn.call(dependencies) === '[object Object]') {
@@ -5088,7 +5136,7 @@
 	              files[file] = mtime.getTime();
 	            }
 	            result[Cache.FILES] = files;
-	            fn(result);
+	            fn(null, result);
 	          } else {
 	            async.eachSeries(dependencies[Cache.FILES], function(file, cb) {
 	              file = path.resolve(file);
@@ -5102,25 +5150,19 @@
 	              });
 	            }, function(err) {
 	              if (err) {
-	                throw err;
+	                return fn(err, null);
 	              } else {
 	                result[Cache.FILES] = files;
-	                return fn(result);
+	                return fn(null, result);
 	              }
 	            });
-	            _ref3 = dependencies[Cache.FILES];
-	            for (_k = 0, _len2 = _ref3.length; _k < _len2; _k++) {
-	              file = _ref3[_k];
-	              file = path.resolve(file);
-	              files[file] = (new Date(Cache.getFs().statSync(file).mtime)).getTime();
-	            }
 	          }
 	          return result[Cache.FILES] = files;
 	        } else {
-	          return fn(result);
+	          return fn(null, result);
 	        }
 	      } else {
-	        return fn(result);
+	        return fn(null, result);
 	      }
 	    };
 	
@@ -6138,9 +6180,7 @@
 	      return {};
 	    };
 	
-	    DevNullStorage.prototype.writeData = function(data, meta) {
-	      return this;
-	    };
+	    DevNullStorage.prototype.writeData = function(data, meta) {};
 	
 	    DevNullStorage.prototype.read = function(key) {
 	      return null;
@@ -6150,12 +6190,9 @@
 	      if (dependencies == null) {
 	        dependencies = {};
 	      }
-	      return this;
 	    };
 	
-	    DevNullStorage.prototype.remove = function(key) {
-	      return this;
-	    };
+	    DevNullStorage.prototype.remove = function(key) {};
 	
 	    return DevNullStorage;
 	
@@ -6234,33 +6271,34 @@
 	              encoding: 'utf8'
 	            }, function(err, data) {
 	              if (err) {
-	                throw err;
+	                return fn(err, null);
+	              } else {
+	                _this.allData = JSON.parse(data);
+	                return fn(null, _this.allData);
 	              }
-	              _this.allData = JSON.parse(data);
-	              return fn(_this.allData);
 	            });
 	          } else {
 	            _this.allData = {
 	              data: {},
 	              meta: {}
 	            };
-	            return fn(_this.allData);
+	            return fn(null, _this.allData);
 	          }
 	        });
 	      } else {
-	        return fn(this.allData);
+	        return fn(null, this.allData);
 	      }
 	    };
 	
 	    FileStorage.prototype.getData = function(fn) {
-	      return this.loadData(function(data) {
-	        return fn(data.data);
+	      return this.loadData(function(err, data) {
+	        return fn(err, data.data);
 	      });
 	    };
 	
 	    FileStorage.prototype.getMeta = function(fn) {
-	      return this.loadData(function(data) {
-	        return fn(data.meta);
+	      return this.loadData(function(err, data) {
+	        return fn(err, data.meta);
 	      });
 	    };
 	
@@ -6278,9 +6316,10 @@
 	        meta: this.meta
 	      }), function(err) {
 	        if (err) {
-	          throw err;
+	          return fn(err);
+	        } else {
+	          return fn(null);
 	        }
-	        return fn();
 	      });
 	      return this;
 	    };
@@ -6392,11 +6431,10 @@
 	        meta: this.meta
 	      };
 	      file = this.getFileName();
-	      Cache.getFs().writeFileSync(file, JSON.stringify({
+	      return Cache.getFs().writeFileSync(file, JSON.stringify({
 	        data: this.data,
 	        meta: this.meta
 	      }));
-	      return this;
 	    };
 	
 	    return FileStorage;
@@ -6444,23 +6482,20 @@
 	      if (this.data === null) {
 	        this.data = {};
 	      }
-	      fn(this.data);
-	      return null;
+	      return fn(null, this.data);
 	    };
 	
 	    MemoryStorage.prototype.getMeta = function(fn) {
 	      if (this.meta === null) {
 	        this.meta = {};
 	      }
-	      fn(this.meta);
-	      return null;
+	      return fn(null, this.meta);
 	    };
 	
 	    MemoryStorage.prototype.writeData = function(data, meta, fn) {
 	      this.data = data;
 	      this.meta = meta;
-	      fn();
-	      return this;
+	      return fn(null);
 	    };
 	
 	    return MemoryStorage;
@@ -6521,7 +6556,6 @@
 	    MemoryStorage.prototype.writeData = function(data, meta) {
 	      this.data = data;
 	      this.meta = meta;
-	      return this;
 	    };
 	
 	    return MemoryStorage;
@@ -6626,27 +6660,33 @@
 	    };
 	
 	    RedisStorage.prototype.getMeta = function(fn) {
-	      return this._read(RedisStorage.META_KEY, function(err, data) {
-	        return fn(data);
-	      }, {});
+	      return this._read(RedisStorage.META_KEY, fn, {});
 	    };
 	
 	    RedisStorage.prototype.read = function(key, fn) {
 	      var _this = this;
 	      return this._read(key, function(err, data) {
-	        if (data === null) {
-	          return fn(null);
+	        if (err) {
+	          return fn(err, null);
+	        } else if (data === null) {
+	          return fn(null, null);
 	        } else {
-	          return _this.findMeta(key, function(meta) {
-	            return _this.verify(meta, function(state) {
-	              if (state) {
-	                return fn(data);
-	              } else {
-	                return _this.remove(key, function() {
-	                  return fn(null);
-	                });
-	              }
-	            });
+	          return _this.findMeta(key, function(err, meta) {
+	            if (err) {
+	              return fn(err, null);
+	            } else {
+	              return _this.verify(meta, function(err, state) {
+	                if (err) {
+	                  return fn(err, null);
+	                } else if (state) {
+	                  return fn(null, data);
+	                } else {
+	                  return _this.remove(key, function() {
+	                    return fn(null, null);
+	                  });
+	                }
+	              });
+	            }
 	          });
 	        }
 	      });
@@ -6658,34 +6698,38 @@
 	        dependencies = {};
 	      }
 	      return this._write(key, data, function(err) {
-	        return _this.getMeta(function(meta) {
-	          meta[key] = dependencies;
-	          return _this._write(RedisStorage.META_KEY, meta, function(err) {
-	            return fn();
+	        if (err) {
+	          return fn(err);
+	        } else {
+	          return _this.getMeta(function(err, meta) {
+	            if (err) {
+	              return fn(err);
+	            } else {
+	              meta[key] = dependencies;
+	              return _this._write(RedisStorage.META_KEY, meta, fn);
+	            }
 	          });
-	        });
+	        }
 	      });
 	    };
 	
 	    RedisStorage.prototype.remove = function(key, fn) {
 	      var _this = this;
-	      return this.getMeta(function(meta) {
-	        if (typeof meta[key] !== 'undefined') {
-	          delete meta[key];
-	        }
-	        return _this._remove(key, function(err) {
-	          if (err) {
-	            return fn(err);
-	          } else {
-	            return _this._write(RedisStorage.META_KEY, meta, function(err) {
-	              if (err) {
-	                return fn(err);
-	              } else {
-	                return fn(null);
-	              }
-	            });
+	      return this.getMeta(function(err, meta) {
+	        if (err) {
+	          return fn(err);
+	        } else {
+	          if (typeof meta[key] !== 'undefined') {
+	            delete meta[key];
 	          }
-	        });
+	          return _this._remove(key, function(err) {
+	            if (err) {
+	              return fn(err);
+	            } else {
+	              return _this._write(RedisStorage.META_KEY, meta, fn);
+	            }
+	          });
+	        }
 	      });
 	    };
 	
@@ -9062,7 +9106,7 @@
 	    });
 	    describe('#verify()', function() {
 	      it('should just return true', function(done) {
-	        return storage.verify('random variable', function(state) {
+	        return storage.verify('random variable', function(err, state) {
 	          expect(state).to.be["true"];
 	          return done();
 	        });
@@ -9070,20 +9114,20 @@
 	      it('should return false if meta expired', function(done) {
 	        return storage.verify({
 	          expire: (new Date).getTime() - 200
-	        }, function(state) {
+	        }, function(err, state) {
 	          expect(state).to.be["false"];
 	          return done();
 	        });
 	      });
 	      it('should return false if dependent meta expired', function(done) {
 	        storage.findMeta = function(key, fn) {
-	          return fn({
+	          return fn(null, {
 	            expire: (new Date).getTime() - 200
 	          });
 	        };
 	        return storage.verify({
 	          items: ['test']
-	        }, function(state) {
+	        }, function(err, state) {
 	          expect(state).to.be["false"];
 	          return done();
 	        });
@@ -9096,10 +9140,10 @@
 	          files: files
 	        };
 	        return setTimeout(function() {
-	          return storage.verify(meta, function(state) {
+	          return storage.verify(meta, function(err, state) {
 	            expect(state).to.be["true"];
 	            changeFile(__filename);
-	            return storage.verify(meta, function(state) {
+	            return storage.verify(meta, function(err, state) {
 	              expect(state).to.be["false"];
 	              return done();
 	            });
@@ -9109,7 +9153,7 @@
 	    });
 	    return describe('#parseDependencies()', function() {
 	      it('should return empty object for unknown type of dependencies', function(done) {
-	        return storage.parseDependencies('random variable', function(dependencies) {
+	        return storage.parseDependencies('random variable', function(err, dependencies) {
 	          expect(dependencies).to.be.eql({});
 	          return done();
 	        });
@@ -9117,7 +9161,7 @@
 	      it('should add priority into dependencies', function(done) {
 	        return storage.parseDependencies({
 	          priority: 100
-	        }, function(dependencies) {
+	        }, function(err, dependencies) {
 	          expect(dependencies).to.be.eql({
 	            priority: 100
 	          });
@@ -9127,7 +9171,7 @@
 	      it('should add tags into dependencies', function(done) {
 	        return storage.parseDependencies({
 	          tags: ['comment', 'article']
-	        }, function(dependencies) {
+	        }, function(err, dependencies) {
 	          expect(dependencies).to.be.eql({
 	            tags: ['comment', 'article']
 	          });
@@ -9137,7 +9181,7 @@
 	      it('should add dependent item into dependencies', function(done) {
 	        return storage.parseDependencies({
 	          items: ['first', 'second']
-	        }, function(dependencies) {
+	        }, function(err, dependencies) {
 	          expect(dependencies).to.be.eql({
 	            items: [cache.generateKey('first'), cache.generateKey('second')]
 	          });
@@ -9149,7 +9193,7 @@
 	        time = '2014-01-14 20:10';
 	        return storage.parseDependencies({
 	          expire: time
-	        }, function(dependencies) {
+	        }, function(err, dependencies) {
 	          expect(dependencies).to.be.eql({
 	            expire: moment(time, Cache.TIME_FORMAT).valueOf()
 	          });
@@ -9162,7 +9206,7 @@
 	        files[__filename] = window.require.getStats(__filename).mtime.getTime();
 	        return storage.parseDependencies({
 	          files: [__filename]
-	        }, function(dependencies) {
+	        }, function(err, dependencies) {
 	          expect(dependencies).to.be.eql({
 	            files: files
 	          });
@@ -9935,7 +9979,7 @@
 , 'redis': function(exports, module) { module.exports = window.require('redis/index.js'); }
 
 });
-require.__setStats({"/lib/Storage/Sync/BrowserLocalStorage.js":{"atime":1389743491000,"mtime":1389743489000,"ctime":1389743489000},"/lib/Storage/Sync/Storage.js":{"atime":1389796613000,"mtime":1389796185000,"ctime":1389796185000},"/lib/Storage/Storage.js":{"atime":1389796613000,"mtime":1389796296000,"ctime":1389796296000},"moment/moment.js":{"atime":1389726647000,"mtime":1387832828000,"ctime":1389389769000},"/lib/Cache.js":{"atime":1389743491000,"mtime":1389743489000,"ctime":1389743489000},"fs-mock/lib/fs.js":{"atime":1389796776000,"mtime":1389273046000,"ctime":1389391420000},"fs-mock/lib/Stats.js":{"atime":1389796777000,"mtime":1389269301000,"ctime":1389391420000},"fs-mock/lib/Errors.js":{"atime":1389796777000,"mtime":1389269301000,"ctime":1389391420000},"fs-mock/lib/FSWatcher.js":{"atime":1389796777000,"mtime":1389269301000,"ctime":1389391420000},"escape-regexp/index.js":{"atime":1389796777000,"mtime":1345153109000,"ctime":1389391421000},"/lib/Storage/Async/DevNullStorage.js":{"atime":1389743491000,"mtime":1389743489000,"ctime":1389743489000},"/lib/Storage/Async/Storage.js":{"atime":1389799411000,"mtime":1389799401000,"ctime":1389799401000},"async/lib/async.js":{"atime":1389796776000,"mtime":1369727354000,"ctime":1389710356000},"/lib/Storage/Sync/DevNullStorage.js":{"atime":1389743491000,"mtime":1389743489000,"ctime":1389743489000},"/lib/Storage/Async/FileStorage.js":{"atime":1389743491000,"mtime":1389743489000,"ctime":1389743489000},"/lib/Storage/Sync/FileStorage.js":{"atime":1389743491000,"mtime":1389743489000,"ctime":1389743489000},"/lib/Storage/Async/MemoryStorage.js":{"atime":1389743491000,"mtime":1389743489000,"ctime":1389743489000},"/lib/Storage/Sync/MemoryStorage.js":{"atime":1389743491000,"mtime":1389743489000,"ctime":1389743489000},"/lib/Storage/Async/RedisStorage.js":{"atime":1389799270000,"mtime":1389799265000,"ctime":1389799265000},"redis/index.js":{"atime":1389786853000,"mtime":1387652552000,"ctime":1389786795000},"redis/lib/util.js":{"atime":1389786853000,"mtime":1363147062000,"ctime":1389786795000},"redis/lib/queue.js":{"atime":1389786853000,"mtime":1363195944000,"ctime":1389786795000},"redis/lib/to_array.js":{"atime":1389786853000,"mtime":1363147062000,"ctime":1389786795000},"redis/lib/parser/hiredis.js":{"atime":1389786853000,"mtime":1363195944000,"ctime":1389786795000},"redis/lib/parser/javascript.js":{"atime":1389786853000,"mtime":1385231603000,"ctime":1389786795000},"redis/lib/commands.js":{"atime":1389786853000,"mtime":1387650093000,"ctime":1389786795000},"/Storage/BrowserLocalStorage.js":{"atime":1389743491000,"mtime":1389743489000,"ctime":1389743489000},"/Storage/BrowserLocalSyncStorage.js":{"atime":1389743491000,"mtime":1389743489000,"ctime":1389743489000},"/Storage/DevNullAsyncStorage.js":{"atime":1389743491000,"mtime":1389743489000,"ctime":1389743489000},"/Storage/DevNullStorage.js":{"atime":1389743491000,"mtime":1389743489000,"ctime":1389743489000},"/Storage/DevNullSyncStorage.js":{"atime":1389743491000,"mtime":1389743489000,"ctime":1389743489000},"/Storage/FileAsyncStorage.js":{"atime":1389743491000,"mtime":1389743489000,"ctime":1389743489000},"/Storage/FileStorage.js":{"atime":1389743491000,"mtime":1389743489000,"ctime":1389743489000},"/Storage/FileSyncStorage.js":{"atime":1389743491000,"mtime":1389743489000,"ctime":1389743489000},"/Storage/MemoryAsyncStorage.js":{"atime":1389743491000,"mtime":1389743489000,"ctime":1389743489000},"/Storage/MemoryStorage.js":{"atime":1389743491000,"mtime":1389743489000,"ctime":1389743489000},"/Storage/MemorySyncStorage.js":{"atime":1389743491000,"mtime":1389743489000,"ctime":1389743489000},"/Storage/RedisAsyncStorage.js":{"atime":1389786953000,"mtime":1389786952000,"ctime":1389786952000},"/test/browser/tests/Cache.coffee":{"atime":1389796778000,"mtime":1383999743000,"ctime":1389463648000},"/test/browser/tests/Storage/Async/DevNullStorage.coffee":{"atime":1389743491000,"mtime":1389743489000,"ctime":1389743489000},"/test/browser/tests/Storage/Async/MemoryStorage.coffee":{"atime":1389799413000,"mtime":1389799359000,"ctime":1389799359000},"/test/browser/tests/Storage/Async/Storage.coffee":{"atime":1389785279000,"mtime":1389785279000,"ctime":1389785279000},"/test/browser/tests/Storage/Sync/BrowserLocalStorage.coffee":{"atime":1389743491000,"mtime":1389743489000,"ctime":1389743489000},"/test/browser/tests/Storage/Sync/DevNullStorage.coffee":{"atime":1389743491000,"mtime":1389743489000,"ctime":1389743489000},"/test/browser/tests/Storage/Sync/FileStorage.coffee":{"atime":1389743491000,"mtime":1389743489000,"ctime":1389743489000},"/test/browser/tests/Storage/Sync/MemoryStorage.coffee":{"atime":1389743491000,"mtime":1389743489000,"ctime":1389743489000},"/test/browser/tests/Storage/Sync/Storage.coffee":{"atime":1389785279000,"mtime":1389785279000,"ctime":1389785279000},"/package.json":{"atime":1389786791000,"mtime":1389786773000,"ctime":1389786773000},"moment/package.json":{"atime":1389796776000,"mtime":1389389769000,"ctime":1389389769000},"async/package.json":{"atime":1389796776000,"mtime":1389710356000,"ctime":1389710356000},"redis/package.json":{"atime":1389786853000,"mtime":1389786795000,"ctime":1389786795000}});
+require.__setStats({"/lib/Storage/Sync/BrowserLocalStorage.js":{"atime":1389805806000,"mtime":1389804881000,"ctime":1389804881000},"/lib/Storage/Sync/Storage.js":{"atime":1389805806000,"mtime":1389804956000,"ctime":1389804956000},"/lib/Storage/Storage.js":{"atime":1389799819000,"mtime":1389799818000,"ctime":1389799818000},"moment/moment.js":{"atime":1389726647000,"mtime":1387832828000,"ctime":1389389769000},"/lib/Cache.js":{"atime":1389806757000,"mtime":1389806670000,"ctime":1389806670000},"fs-mock/lib/fs.js":{"atime":1389796776000,"mtime":1389273046000,"ctime":1389391420000},"fs-mock/lib/Stats.js":{"atime":1389796777000,"mtime":1389269301000,"ctime":1389391420000},"fs-mock/lib/Errors.js":{"atime":1389796777000,"mtime":1389269301000,"ctime":1389391420000},"fs-mock/lib/FSWatcher.js":{"atime":1389796777000,"mtime":1389269301000,"ctime":1389391420000},"escape-regexp/index.js":{"atime":1389796777000,"mtime":1345153109000,"ctime":1389391421000},"/lib/Storage/Async/DevNullStorage.js":{"atime":1389807678000,"mtime":1389807676000,"ctime":1389807676000},"/lib/Storage/Async/Storage.js":{"atime":1389806757000,"mtime":1389806460000,"ctime":1389806460000},"async/lib/async.js":{"atime":1389796776000,"mtime":1369727354000,"ctime":1389710356000},"/lib/Storage/Sync/DevNullStorage.js":{"atime":1389805806000,"mtime":1389804904000,"ctime":1389804904000},"/lib/Storage/Async/FileStorage.js":{"atime":1389805806000,"mtime":1389805082000,"ctime":1389805082000},"/lib/Storage/Sync/FileStorage.js":{"atime":1389805806000,"mtime":1389804920000,"ctime":1389804920000},"/lib/Storage/Async/MemoryStorage.js":{"atime":1389805806000,"mtime":1389805095000,"ctime":1389805095000},"/lib/Storage/Sync/MemoryStorage.js":{"atime":1389805806000,"mtime":1389804941000,"ctime":1389804941000},"/lib/Storage/Async/RedisStorage.js":{"atime":1389805806000,"mtime":1389805342000,"ctime":1389805342000},"redis/index.js":{"atime":1389786853000,"mtime":1387652552000,"ctime":1389786795000},"redis/lib/util.js":{"atime":1389786853000,"mtime":1363147062000,"ctime":1389786795000},"redis/lib/queue.js":{"atime":1389786853000,"mtime":1363195944000,"ctime":1389786795000},"redis/lib/to_array.js":{"atime":1389786853000,"mtime":1363147062000,"ctime":1389786795000},"redis/lib/parser/hiredis.js":{"atime":1389786853000,"mtime":1363195944000,"ctime":1389786795000},"redis/lib/parser/javascript.js":{"atime":1389786853000,"mtime":1385231603000,"ctime":1389786795000},"redis/lib/commands.js":{"atime":1389786853000,"mtime":1387650093000,"ctime":1389786795000},"/Storage/BrowserLocalStorage.js":{"atime":1389743491000,"mtime":1389743489000,"ctime":1389743489000},"/Storage/BrowserLocalSyncStorage.js":{"atime":1389743491000,"mtime":1389743489000,"ctime":1389743489000},"/Storage/DevNullAsyncStorage.js":{"atime":1389743491000,"mtime":1389743489000,"ctime":1389743489000},"/Storage/DevNullStorage.js":{"atime":1389743491000,"mtime":1389743489000,"ctime":1389743489000},"/Storage/DevNullSyncStorage.js":{"atime":1389743491000,"mtime":1389743489000,"ctime":1389743489000},"/Storage/FileAsyncStorage.js":{"atime":1389743491000,"mtime":1389743489000,"ctime":1389743489000},"/Storage/FileStorage.js":{"atime":1389743491000,"mtime":1389743489000,"ctime":1389743489000},"/Storage/FileSyncStorage.js":{"atime":1389743491000,"mtime":1389743489000,"ctime":1389743489000},"/Storage/MemoryAsyncStorage.js":{"atime":1389743491000,"mtime":1389743489000,"ctime":1389743489000},"/Storage/MemoryStorage.js":{"atime":1389743491000,"mtime":1389743489000,"ctime":1389743489000},"/Storage/MemorySyncStorage.js":{"atime":1389743491000,"mtime":1389743489000,"ctime":1389743489000},"/Storage/RedisAsyncStorage.js":{"atime":1389799819000,"mtime":1389799818000,"ctime":1389799818000},"/test/browser/tests/Cache.coffee":{"atime":1389796778000,"mtime":1383999743000,"ctime":1389463648000},"/test/browser/tests/Storage/Async/DevNullStorage.coffee":{"atime":1389743491000,"mtime":1389743489000,"ctime":1389743489000},"/test/browser/tests/Storage/Async/MemoryStorage.coffee":{"atime":1389799819000,"mtime":1389799818000,"ctime":1389799818000},"/test/browser/tests/Storage/Async/Storage.coffee":{"atime":1389807829000,"mtime":1389807822000,"ctime":1389807822000},"/test/browser/tests/Storage/Sync/BrowserLocalStorage.coffee":{"atime":1389743491000,"mtime":1389743489000,"ctime":1389743489000},"/test/browser/tests/Storage/Sync/DevNullStorage.coffee":{"atime":1389743491000,"mtime":1389743489000,"ctime":1389743489000},"/test/browser/tests/Storage/Sync/FileStorage.coffee":{"atime":1389743491000,"mtime":1389743489000,"ctime":1389743489000},"/test/browser/tests/Storage/Sync/MemoryStorage.coffee":{"atime":1389743491000,"mtime":1389743489000,"ctime":1389743489000},"/test/browser/tests/Storage/Sync/Storage.coffee":{"atime":1389785279000,"mtime":1389785279000,"ctime":1389785279000},"/package.json":{"atime":1389799819000,"mtime":1389799818000,"ctime":1389799818000},"moment/package.json":{"atime":1389796776000,"mtime":1389389769000,"ctime":1389389769000},"async/package.json":{"atime":1389796776000,"mtime":1389710356000,"ctime":1389710356000},"redis/package.json":{"atime":1389786853000,"mtime":1389786795000,"ctime":1389786795000}});
 require.version = '5.5.1';
 
 /** run section **/

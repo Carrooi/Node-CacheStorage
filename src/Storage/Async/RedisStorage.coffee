@@ -57,56 +57,65 @@ class RedisStorage extends Storage
 
 
 	_removeAll: (fn) ->
-		@client.FLUSHDB(fn)
+		@client.FLUSHDB fn
 
 
 	getMeta: (fn) ->
-		@_read RedisStorage.META_KEY, (err, data) ->
-			fn(data)
-		, {}
+		@_read RedisStorage.META_KEY, fn, {}
 
 
 
 	read: (key, fn) ->
 		@_read key, (err, data) =>
-			if data == null
-				fn(null)
+			if err
+				fn(err, null)
+			else if data == null
+				fn(null, null)
 			else
-				@findMeta(key, (meta) =>
-					@verify(meta, (state) =>
-						if state
-							fn(data)
-						else
-							@remove(key, ->
-								fn(null)
-							)
-					)
+				@findMeta(key, (err, meta) =>
+					if err
+						fn(err, null)
+					else
+						@verify(meta, (err, state) =>
+							if err
+								fn(err, null)
+							else if state
+								fn(null, data)
+							else
+								@remove(key, ->
+									fn(null, null)
+								)
+						)
 				)
 
 
 	write: (key, data, dependencies = {}, fn) ->
 		@_write key, data, (err) =>
-			@getMeta( (meta) =>
-				meta[key] = dependencies
-				@_write RedisStorage.META_KEY, meta, (err) ->
-					fn()
-			)
+			if err
+				fn(err)
+			else
+				@getMeta( (err, meta) =>
+					if err
+						fn(err)
+					else
+						meta[key] = dependencies
+						@_write RedisStorage.META_KEY, meta, fn
+				)
 
 
 	remove: (key, fn) ->
-		@getMeta( (meta) =>
-			if typeof meta[key] != 'undefined'
-				delete meta[key]
+		@getMeta( (err, meta) =>
+			if err
+				fn(err)
+			else
+				if typeof meta[key] != 'undefined'
+					delete meta[key]
 
-			@_remove key, (err) =>
-				if err
-					fn(err)
-				else
-					@_write RedisStorage.META_KEY, meta, (err) ->
-						if err
-							fn(err)
-						else
-							fn(null)
+				@_remove key, (err) =>
+					if err
+						fn(err)
+					else
+						@_write RedisStorage.META_KEY, meta, fn
 		)
 
 

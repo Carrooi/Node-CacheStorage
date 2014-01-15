@@ -16,45 +16,64 @@ class Storage extends BaseStorage
 
 
 	read: (key, fn) ->
-		@getData( (data) =>
-			if typeof data[key] == 'undefined'
-				fn(null)
+		@getData( (err, data) =>
+			if err
+				fn(err, null)
+			else if typeof data[key] == 'undefined'
+				fn(null, null)
 			else
-				@findMeta(key, (meta) =>
-					@verify(meta, (state) =>
-						if state
-							fn(data[key])
-						else
-							@remove(key, ->
-								fn(null)
-							)
-					)
+				@findMeta(key, (err, meta) =>
+					if err
+						fn(err, null)
+					else
+						@verify(meta, (err, state) =>
+							if err
+								fn(err, null)
+							else if state
+								fn(null, data[key])
+							else
+								@remove(key, (err) ->
+									if err
+										fn(err, null)
+									else
+										fn(null, null)
+								)
+						)
 				)
 		)
 
 
 	write: (key, data, dependencies = {}, fn) ->
-		@getData( (all) =>
-			all[key] = data
-			@getMeta( (meta) =>
-				meta[key] = dependencies
-				@writeData(all, meta, ->
-					fn()
+		@getData( (err, all) =>
+			if err
+				fn(err)
+			else
+				all[key] = data
+				@getMeta( (err, meta) =>
+					if err
+						fn(err)
+					else
+						meta[key] = dependencies
+						@writeData(all, meta, fn)
 				)
-			)
 		)
 
 
 	remove: (key, fn) ->
-		@getData( (data) =>
-			@getMeta( (meta) =>
-				if typeof data[key] != 'undefined'
-					delete data[key]
-					delete meta[key]
-				@writeData(data, meta, ->
-					fn()
+		@getData( (err, data) =>
+			if err
+				fn(err)
+			else
+				@getMeta( (err, meta) =>
+					if err
+						fn(err)
+					else
+						if typeof data[key] != 'undefined'
+							delete data[key]
+							delete meta[key]
+
+						@writeData(data, meta, fn)
 				)
-			)
 		)
 
 
@@ -78,61 +97,74 @@ class Storage extends BaseStorage
 
 			removeKeys = (keys) =>
 				async.eachSeries(keys, (key, cb) =>
-					@remove(key, ->
-						cb()
+					@remove(key, (err) ->
+						cb(err)
 					)
-				, ->
-					fn()
+				, (err) ->
+					fn(err)
 				)
 
 			keys = []
 			async.eachSeries(conditions[Cache.TAGS], (tag, cb) =>
-				@findKeysByTag(tag, (_keys) ->
+				@findKeysByTag(tag, (err, _keys) ->
 					keys = keys.concat(_keys)
-					cb()
+					cb(err)
 				)
-			, =>
-				if typeof conditions[Cache.PRIORITY] == 'undefined'
+			, (err) =>
+				if err
+					fn(err)
+				else if typeof conditions[Cache.PRIORITY] == 'undefined'
 					removeKeys(keys)
 				else
-					@findKeysByPriority(conditions[Cache.PRIORITY], (_keys) =>
-						keys = keys.concat(_keys)
-						removeKeys(keys)
+					@findKeysByPriority(conditions[Cache.PRIORITY], (err, _keys) =>
+						if err
+							fn(err)
+						else
+							keys = keys.concat(_keys)
+							removeKeys(keys)
 					)
 			)
 
 		else
-			fn()
+			fn(null)
 
 		return @
 
 
 	findMeta: (key, fn) ->
-		@getMeta( (meta) ->
-			if typeof meta[key] != 'undefined'
-				fn(meta[key])
+		@getMeta( (err, meta) ->
+			if err
+				fn(err, null)
+			else if typeof meta[key] != 'undefined'
+				fn(null, meta[key])
 			else
-				fn(null)
+				fn(null, null)
 		)
 
 
 	findKeysByTag: (tag, fn) ->
-		@getMeta( (metas) ->
-			result = []
-			for key, meta of metas
-				if typeof meta[Cache.TAGS] != 'undefined' && meta[Cache.TAGS].indexOf(tag) != -1
-					result.push(key)
-			fn(result)
+		@getMeta( (err, metas) ->
+			if err
+				fn(err, null)
+			else
+				result = []
+				for key, meta of metas
+					if typeof meta[Cache.TAGS] != 'undefined' && meta[Cache.TAGS].indexOf(tag) != -1
+						result.push(key)
+				fn(null, result)
 		)
 
 
 	findKeysByPriority: (priority, fn) ->
-		@getMeta( (metas) ->
-			result = []
-			for key, meta of metas
-				if typeof meta[Cache.PRIORITY] != 'undefined' && meta[Cache.PRIORITY] <= priority
-					result.push(key)
-			fn(result)
+		@getMeta( (err, metas) ->
+			if err
+				fn(err, null)
+			else
+				result = []
+				for key, meta of metas
+					if typeof meta[Cache.PRIORITY] != 'undefined' && meta[Cache.PRIORITY] <= priority
+						result.push(key)
+				fn(null, result)
 		)
 
 
@@ -142,21 +174,27 @@ class Storage extends BaseStorage
 		if typefn.call(meta) == '[object Object]'
 			if typeof meta[Cache.EXPIRE] != 'undefined'
 				if moment().valueOf() >= meta[Cache.EXPIRE]
-					fn(false)
+					fn(null, false)
 					return null
 
 			if typeof meta[Cache.ITEMS] == 'undefined'
 				meta[Cache.ITEMS] = []
 
 			async.eachSeries(meta[Cache.ITEMS], (item, cb) =>
-				@findMeta(item, (meta) =>
-					if meta == null
-						fn(false)
+				@findMeta(item, (err, meta) =>
+					if err
+						fn(err, null)
+						cb(new Error 'Fake error')
+					else if meta == null
+						fn(null, false)
 						cb(new Error 'Fake error')
 					else if meta != null
-						@verify(meta, (state) ->
-							if state == false
-								fn(false)
+						@verify(meta, (err, state) ->
+							if err
+								fn(err, null)
+								cb(new Error 'Fake error')
+							else if state == false
+								fn(null, false)
 								cb(new Error 'Fake error')
 							else
 								cb()
@@ -177,10 +215,10 @@ class Storage extends BaseStorage
 								throw new Error 'File stats are disabled in your simq configuration. Can not get stats for ' + file + '.'
 
 							if window.require.getStats(file).mtime.getTime() != time
-								fn(false)
+								fn(null, false)
 								return null
 
-						fn(true)
+						fn(null, true)
 					else
 						files = []
 						for file, time of meta[Cache.FILES]
@@ -192,7 +230,7 @@ class Storage extends BaseStorage
 									cb(err)
 								else
 									if (new Date(stats.mtime)).getTime() != item.time
-										fn(false)
+										fn(null, false)
 										cb(new Error 'Fake error')
 									else
 										cb()
@@ -201,14 +239,14 @@ class Storage extends BaseStorage
 							if err && err.message == 'Fake error'
 								# skip
 							else if err
-								throw err
+								fn(err, null)
 							else
-								fn(true)
+								fn(null, true)
 						)
 			)
 
 		else
-			fn(true)
+			fn(null, true)
 
 
 	parseDependencies: (dependencies, fn) ->
@@ -253,7 +291,7 @@ class Storage extends BaseStorage
 						files[file] = mtime.getTime()
 
 					result[Cache.FILES] = files
-					fn(result)
+					fn(null, result)
 				else
 					async.eachSeries(dependencies[Cache.FILES], (file, cb) ->
 						file = path.resolve(file)
@@ -266,22 +304,19 @@ class Storage extends BaseStorage
 						)
 					, (err) ->
 						if err
-							throw err
+							fn(err, null)
 						else
 							result[Cache.FILES] = files
-							fn(result)
+							fn(null, result)
 					)
-					for file in dependencies[Cache.FILES]
-						file = path.resolve(file)
-						files[file] = (new Date(Cache.getFs().statSync(file).mtime)).getTime()
 
 				result[Cache.FILES] = files
 
 			else
-				fn(result)
+				fn(null, result)
 
 		else
-			fn(result)
+			fn(null, result)
 
 
 module.exports = Storage

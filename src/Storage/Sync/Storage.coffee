@@ -31,7 +31,6 @@ class Storage extends BaseStorage
 		meta = @getMeta()
 		meta[key] = dependencies
 		@writeData(all, meta)
-		return @
 
 
 	remove: (key) ->
@@ -41,7 +40,6 @@ class Storage extends BaseStorage
 			delete data[key]
 			delete meta[key]
 		@writeData(data, meta)
-		return @
 
 
 	removeAll: ->
@@ -64,8 +62,6 @@ class Storage extends BaseStorage
 			if typeof conditions[Cache.PRIORITY] != 'undefined'
 				for key in @findKeysByPriority(conditions[Cache.PRIORITY])
 					@remove(key)
-
-		return @
 
 
 	findMeta: (key) ->

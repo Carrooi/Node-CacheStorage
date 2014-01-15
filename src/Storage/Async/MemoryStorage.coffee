@@ -12,21 +12,18 @@ class MemoryStorage extends Storage
 		if @data == null
 			@data = {}
 
-		fn(@data)
-		return null
+		fn(null, @data)
 
 
 	getMeta: (fn) ->
 		if @meta == null
 			@meta = {}
 
-		fn(@meta)
-		return null
+		fn(null, @meta)
 
 
 	writeData: (@data, @meta, fn) ->
-		fn()
-		return @
+		fn(null)
 
 
 module.exports = MemoryStorage
