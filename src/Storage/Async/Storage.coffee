@@ -58,12 +58,16 @@ class Storage extends BaseStorage
 		)
 
 
+	removeAll: (fn) ->
+		@writeData({}, {}, fn)
+
+
 	clean: (conditions, fn) ->
 		typeFn = Object.prototype.toString
 		type = typeFn.call(conditions)
 
 		if conditions == Cache.ALL
-			@writeData({}, {}, fn)
+			@removeAll(fn)
 
 		else if type == '[object Object]'
 			if typeof conditions[Cache.TAGS] == 'undefined'
@@ -73,7 +77,7 @@ class Storage extends BaseStorage
 				conditions[Cache.TAGS] = [conditions[Cache.TAGS]]
 
 			removeKeys = (keys) =>
-				async.each(keys, (key, cb) =>
+				async.eachSeries(keys, (key, cb) =>
 					@remove(key, ->
 						cb()
 					)
@@ -82,7 +86,7 @@ class Storage extends BaseStorage
 				)
 
 			keys = []
-			async.each(conditions[Cache.TAGS], (tag, cb) =>
+			async.eachSeries(conditions[Cache.TAGS], (tag, cb) =>
 				@findKeysByTag(tag, (_keys) ->
 					keys = keys.concat(_keys)
 					cb()
@@ -144,7 +148,7 @@ class Storage extends BaseStorage
 			if typeof meta[Cache.ITEMS] == 'undefined'
 				meta[Cache.ITEMS] = []
 
-			async.each(meta[Cache.ITEMS], (item, cb) =>
+			async.eachSeries(meta[Cache.ITEMS], (item, cb) =>
 				@findMeta(item, (meta) =>
 					if meta == null
 						fn(false)
@@ -182,7 +186,7 @@ class Storage extends BaseStorage
 						for file, time of meta[Cache.FILES]
 							files.push(file: file, time: time) for file, time of meta[Cache.FILES]
 
-						async.each(files, (item, cb) =>
+						async.eachSeries(files, (item, cb) =>
 							Cache.getFs().stat(item.file, (err, stats) ->
 								if err
 									cb(err)
@@ -251,7 +255,7 @@ class Storage extends BaseStorage
 					result[Cache.FILES] = files
 					fn(result)
 				else
-					async.each(dependencies[Cache.FILES], (file, cb) ->
+					async.eachSeries(dependencies[Cache.FILES], (file, cb) ->
 						file = path.resolve(file)
 						Cache.getFs().stat(file, (err, stats) ->
 							if err

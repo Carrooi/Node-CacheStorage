@@ -81,7 +81,7 @@
       it('should remove all items with tag "article"', function(done) {
         var data;
         data = [['one', null, ['article']], ['two', 'two', ['category']], ['three', null, ['article']]];
-        return async.each(data, function(item, cb) {
+        return async.eachSeries(data, function(item, cb) {
           return cache.save(item[0], item[0], {
             tags: item[2]
           }, function() {
@@ -91,7 +91,7 @@
           return cache.clean({
             tags: ['article']
           }, function() {
-            return async.each(data, function(item, cb) {
+            return async.eachSeries(data, function(item, cb) {
               return cache.load(item[0], function(err, data) {
                 expect(data).to.be.equal(item[1]);
                 return cb();

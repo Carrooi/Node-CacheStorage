@@ -44,11 +44,15 @@ class Storage extends BaseStorage
 		return @
 
 
+	removeAll: ->
+		@writeData({}, {})
+
+
 	clean: (conditions) ->
 		typeFn = Object.prototype.toString
 		type = typeFn.call(conditions)
 		if conditions == Cache.ALL
-			@writeData({}, {})
+			@removeAll()
 
 		else if type == '[object Object]'
 			if typeof conditions[Cache.TAGS] != 'undefined'

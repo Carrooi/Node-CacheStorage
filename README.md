@@ -42,6 +42,7 @@ more than one independent caches.
 * FileAsyncStorage (`cache-storage/Storage/FileAsyncStorage`)
 * DevNullAsyncStorage (`cache-storage/Storage/DevNullAsyncStorage`)
 * MemoryAsyncStorage (`cache-storage/Storage/MemoryAsyncStorage`)
+* RedisAsyncStorage (`cache-storage/Storage/RedisAsyncStorage`)
 
 More storages will be added in future.
 
@@ -49,10 +50,22 @@ More storages will be added in future.
 
 * `FileSyncStorage`
 * `FileAsyncStorage`
+* `RedisAsyncStorage`
 
 ### Only browser storages
 
 * `BrowserLocalSyncStorage`
+
+### Redis storage
+
+Redis storage uses [redis](https://github.com/mranney/node_redis) module and expose some variables.
+
+```
+cache.storage.selectDatabase(3, function(err) {
+	console.log('changed database');
+});
+cache.storage.client;		// original client object from redis module
+```
 
 ## Loading & saving
 
