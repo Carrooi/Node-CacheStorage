@@ -23,7 +23,6 @@ class MemoryStorage extends Storage
 
 
 	writeData: (@data, @meta) ->
-		return @
 
 
 module.exports = MemoryStorage

@@ -62,7 +62,6 @@ class BrowserLocalStorage extends Storage
 			data: @data
 			meta: @meta
 		))
-		return @
 
 
 module.exports = BrowserLocalStorage

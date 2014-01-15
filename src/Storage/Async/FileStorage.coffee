@@ -41,29 +41,29 @@ class FileStorage extends Storage
 				if exists
 					Cache.getFs().readFile(file, encoding: 'utf8', (err, data) =>
 						if err
-							throw err
-
-						@allData = JSON.parse(data)
-						fn(@allData)
+							fn(err, null)
+						else
+							@allData = JSON.parse(data)
+							fn(null, @allData)
 					)
 				else
 					@allData = {data: {}, meta: {}}
-					fn(@allData)
+					fn(null, @allData)
 			)
 
 		else
-			fn(@allData)
+			fn(null, @allData)
 
 
 	getData: (fn) ->
-		@loadData( (data) ->
-			fn(data.data)
+		@loadData( (err, data) ->
+			fn(err, data.data)
 		)
 
 
 	getMeta: (fn) ->
-		@loadData( (data) ->
-			fn(data.meta)
+		@loadData( (err, data) ->
+			fn(err, data.meta)
 		)
 
 
@@ -78,9 +78,9 @@ class FileStorage extends Storage
 			meta: @meta
 		), (err) ->
 			if err
-				throw err
-
-			fn()
+				fn(err)
+			else
+				fn(null)
 		)
 		return @
 

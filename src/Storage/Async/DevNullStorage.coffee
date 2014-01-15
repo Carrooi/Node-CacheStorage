@@ -4,23 +4,19 @@ class DevNullStorage extends Storage
 
 
 	getData: (fn) ->
-		fn({})
-		return null
+		fn(null, {})
 
 
 	getMeta: (fn) ->
-		fn({})
-		return null
+		fn(null, {})
 
 
 	writeData: (data, meta, fn) ->
-		fn()
-		return @
+		fn(null)
 
 
 	read: (key, fn) ->
-		fn(null)
-		return null
+		fn(null, null)
 
 
 	write: (key, data, dependencies = {}, fn) ->
@@ -28,13 +24,11 @@ class DevNullStorage extends Storage
 			fn = dependencies
 			dependencies = {}
 
-		fn()
-		return @
+		fn(null)
 
 
 	remove: (key, fn) ->
-		fn()
-		return @
+		fn(null)
 
 
 module.exports = DevNullStorage
