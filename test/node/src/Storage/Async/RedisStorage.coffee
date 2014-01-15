@@ -1,14 +1,28 @@
+expect = require('chai').expect
+path = require 'path'
 async = require 'async'
 
-Cache = require 'cache-storage'
-MemoryStorage = require 'cache-storage/Storage/MemoryAsyncStorage'
+Cache = require '../../../../../lib/Cache'
+RedisStorage = require '../../../../../Storage/RedisAsyncStorage'
 
+fs = null
 cache = null
+redis = null
 
-describe 'MemoryAsyncStorage', ->
+describe 'RedisAsyncStorage', ->
 
 	beforeEach( ->
-		cache = new Cache(new MemoryStorage, 'test')
+		cache = new Cache(new RedisStorage('/temp'), 'test')
+		fs = Cache.mockFs(
+			'temp': {}
+			'file': ''
+		)
+		redis = cache.storage.client
+	)
+
+	afterEach( (done) ->
+		Cache.restoreFs()
+		redis.FLUSHDB -> done()
 	)
 
 	describe 'saving/loading', ->
@@ -41,16 +55,13 @@ describe 'MemoryAsyncStorage', ->
 	describe 'expiration', ->
 
 		it 'should expire "true" value after file is changed', (done) ->
-			cache.save 'true', true, {files: [__filename]}, ->
+			cache.save 'true', true, {files: ['/file']}, ->
 				setTimeout( ->
+					fs.writeFileSync('/file', '')
 					cache.load 'true', (err, data) ->
-						expect(data).to.be.true
-						changeFile(__filename)
-						cache.load 'true', (err, data) ->
-							expect(data).to.be.null
-							done()
+						expect(data).to.be.null
+						done()
 				, 100)
-
 
 		it 'should remove all items with tag "article"', (done) ->
 			data = [

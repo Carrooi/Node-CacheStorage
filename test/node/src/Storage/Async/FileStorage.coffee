@@ -91,11 +91,11 @@ describe 'FileAsyncStorage', ->
 				['two', 'two', ['category']]
 				['three', null, ['article']]
 			]
-			async.each(data, (item, cb) ->
+			async.eachSeries(data, (item, cb) ->
 				cache.save item[0], item[0], {tags: item[2]}, -> cb()
 			, ->
 				cache.clean(tags: ['article'], ->
-					async.each(data, (item, cb) ->
+					async.eachSeries(data, (item, cb) ->
 						cache.load item[0], (err, data) ->
 							expect(data).to.be.equal(item[1])
 							cb()
