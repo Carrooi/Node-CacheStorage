@@ -20,32 +20,56 @@ Required node version: >= 0.9
 
 ```
 var Cache = require('cache-storage');
-var FileStorage = require('cache-storage/Storage/FileStorage');
+var FileStorage = require('cache-storage/Storage/FileSyncStorage');
 
 var cache = new Cache(new FileStorage('./temp'), 'namespace');
 ```
 
-You have to set storage which you want to use (their list below) and name of namespace for cache, because you can use
+You have to set storage which you want to use (their list below) and namespace for cache, because you can use
 more than one independent caches.
 
 ## Available storages
 
-* FileStorage (cache-storage/Storage/FileStorage - saving data to json files)
-* BrowserLocalStorage (cache-storage/Storage/BrowserLocalStorage - saving data to HTML5 local storage)
-* DevNullStorage (cache-storage/Storage/DevNullStorage - does not save anything and load always null)
-* MemoryStorage (cache-storage/Storage/MemoryStorage - saving data just into storage's class property)
+### Synchronous storages
+
+* `cache-storage/Storage/FileSyncStorage`: saving data into json files
+* `cache-storage/Storage/BrowserLocalSyncStorage`: saving data into HTML5 local storage
+* `cache-storage/Storage/DevNullSyncStorage`: does not save anything and load always null
+* `cache-storage/Storage/MemorySyncStorage`: saving data just into storage's class properties
+
+### Asynchronouse storages
+
+* `cache-storage/Storage/FileAsyncStorage`
+* `cache-storage/Storage/DevNullAsyncStorage`
+* `cache-storage/Storage/MemoryAsyncStorage`
+* `cache-storage/Storage/RedisAsyncStorage`: uses [redis](https://github.com/mranney/node_redis) package
 
 More storages will be added in future.
 
 ### Only node storages
 
-* FileStorage
+* `cache-storage/Storage/FileSyncStorage`
+* `cache-storage/Storage/FileAsyncStorage`
+* `cache-storage/Storage/RedisAsyncStorage`
 
 ### Only browser storages
 
-* BrowserLocalStorage
+* `cache-storage/Storage/BrowserLocalSyncStorage`
+
+### Redis storage
+
+This storage exposes some variables from original package ([redis](https://github.com/mranney/node_redis)).
+
+```
+cache.storage.selectDatabase(3, function(err) {
+	console.log('changed database');
+});
+cache.storage.client;		// original client object from redis module
+```
 
 ## Loading & saving
+
+### Synchronous
 
 ```
 var data = cache.load('some_data');
@@ -69,14 +93,46 @@ var data = cache.load('some_data', function() {
 When no data were found, then fallback anonymous function is called and data from return statement are used.
 Cache.save function always return given data.
 
-## Removing
+### Asynchronous
 
 ```
-if (cache.load('some_data') !== null) {
-	cache.remove('some_data');
+cache.load('some_data', function(err, data) {
+	if (data === null) {
+		cache.save('some_data', 'some value of some_data', function(err, savedData) {
+			console.log(savedData);			// output: some value of some_data
+		});
+	}
+});
+```
 
-	// other way: cache.save('some_data', null);
-}
+or with fallback:
+```
+cache.load('some_data', function() {
+	return 'some value of some_data';
+}, function(data) {
+	console.log(data);		// output: some value of some_data
+});
+```
+
+## Removing
+
+### Synchronous
+
+```
+cache.remove('some_data');
+```
+
+or:
+```
+cache.save('some_data', null);
+```
+
+### Asynchronous
+
+```
+cache.remove('some_data', function(err) {
+	console.log('removed some_data');
+});
 ```
 
 ## Expiration
@@ -100,6 +156,8 @@ If you set files to save function, then that item will expire when some of given
 
 This type of expiration can be used also in browser, but only with [simq](https://npmjs.org/package/simq) and with allowed
 option `filesStats`. See at documentation of [simq](https://npmjs.org/package/simq).
+
+**Second argument in `clean` method is callback with possible error, this is used just for asynchronous storages.**
 
 ### Expiration by tags
 
@@ -152,6 +210,16 @@ $ npm test
 ```
 
 ## Changelog
+
+* 2.0.0
+	+ Support for asynchronous storages
+	+ Appended `Sync` to old storages' names (original names are deprecated)
+	+ Added RedisAsyncStorage, FileAsyncStorage, MemoryAsyncStorage and DevNullAsyncStorage
+	+ Many optimizations
+	+ Added many tests
+	+ Using [fs-mock](https://github.com/sakren/node-fs-mock) for file system
+	+ Updated dependencies
+	+ Better documentation
 
 * 1.4.1
 	+ Can not use some js reserved words
