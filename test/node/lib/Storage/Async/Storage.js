@@ -106,17 +106,19 @@
           items: ['first', 'second']
         }, function(dependencies) {
           expect(dependencies).to.be.eql({
-            items: [97440432, -906279820]
+            items: [cache.generateKey('first'), cache.generateKey('second')]
           });
           return done();
         });
       });
       it('should add date from string into dependencies', function(done) {
+        var time;
+        time = '2014-01-14 20:10';
         return storage.parseDependencies({
-          expire: '2014-01-14 20:10'
+          expire: time
         }, function(dependencies) {
           expect(dependencies).to.be.eql({
-            expire: 1389726600000
+            expire: moment(time, Cache.TIME_FORMAT).valueOf()
           });
           return done();
         });

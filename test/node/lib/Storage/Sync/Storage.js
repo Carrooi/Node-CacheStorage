@@ -83,14 +83,16 @@
         return expect(storage.parseDependencies({
           items: ['first', 'second']
         })).to.be.eql({
-          items: [97440432, -906279820]
+          items: [cache.generateKey('first'), cache.generateKey('second')]
         });
       });
       it('should add date from string into dependencies', function() {
+        var time;
+        time = '2014-01-14 20:10';
         return expect(storage.parseDependencies({
-          expire: '2014-01-14 20:10'
+          expire: time
         })).to.be.eql({
-          expire: 1389726600000
+          expire: moment(time, Cache.TIME_FORMAT).valueOf()
         });
       });
       return it('should add file into dependencies', function() {

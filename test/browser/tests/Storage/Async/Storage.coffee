@@ -3,12 +3,14 @@ Storage = require 'cache-storage/lib/Storage/Async/Storage'
 
 moment = require 'moment'
 
+cache = null
 storage = null
 
 describe 'AsyncStorage', ->
 
 	beforeEach( ->
-		storage = (new Cache(new Storage)).storage
+		storage = new Storage
+		cache = new Cache(storage)
 	)
 
 	describe '#verify()', ->
@@ -70,13 +72,14 @@ describe 'AsyncStorage', ->
 
 		it 'should add dependent item into dependencies', (done) ->
 			storage.parseDependencies(items: ['first', 'second'], (dependencies) ->
-				expect(dependencies).to.be.eql(items: [97440432, -906279820])
+				expect(dependencies).to.be.eql(items: [cache.generateKey('first'), cache.generateKey('second')])
 				done()
 			)
 
 		it 'should add date from string into dependencies', (done) ->
-			storage.parseDependencies(expire: '2014-01-14 20:10', (dependencies) ->
-				expect(dependencies).to.be.eql(expire: 1389726600000)
+			time = '2014-01-14 20:10'
+			storage.parseDependencies(expire: time, (dependencies) ->
+				expect(dependencies).to.be.eql(expire: moment(time, Cache.TIME_FORMAT).valueOf())
 				done()
 			)
 
