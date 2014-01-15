@@ -56,10 +56,11 @@ describe 'SyncStorage', ->
 			expect(storage.parseDependencies(tags: ['comment', 'article'])).to.be.eql(tags: ['comment', 'article'])
 
 		it 'should add dependent item into dependencies', ->
-			expect(storage.parseDependencies(items: ['first', 'second'])).to.be.eql(items: [97440432, -906279820])
+			expect(storage.parseDependencies(items: ['first', 'second'])).to.be.eql(items: [cache.generateKey('first'), cache.generateKey('second')])
 
 		it 'should add date from string into dependencies', ->
-			expect(storage.parseDependencies(expire: '2014-01-14 20:10')).to.be.eql(expire: 1389726600000)
+			time = '2014-01-14 20:10'
+			expect(storage.parseDependencies(expire: time)).to.be.eql(expire: moment(time, Cache.TIME_FORMAT).valueOf())
 
 		it 'should add file into dependencies', ->
 			time = fs.statSync('/file').mtime.getTime()

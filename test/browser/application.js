@@ -6969,7 +6969,7 @@
 
 	/** code **/
 	(function() {
-	  var Cache, Storage, moment, storage;
+	  var Cache, Storage, cache, moment, storage;
 	
 	  Cache = require('cache-storage');
 	
@@ -6977,11 +6977,14 @@
 	
 	  moment = require('moment');
 	
+	  cache = null;
+	
 	  storage = null;
 	
 	  describe('AsyncStorage', function() {
 	    beforeEach(function() {
-	      return storage = (new Cache(new Storage)).storage;
+	      storage = new Storage;
+	      return cache = new Cache(storage);
 	    });
 	    describe('#verify()', function() {
 	      it('should just return true', function(done) {
@@ -7062,17 +7065,19 @@
 	          items: ['first', 'second']
 	        }, function(dependencies) {
 	          expect(dependencies).to.be.eql({
-	            items: [97440432, -906279820]
+	            items: [cache.generateKey('first'), cache.generateKey('second')]
 	          });
 	          return done();
 	        });
 	      });
 	      it('should add date from string into dependencies', function(done) {
+	        var time;
+	        time = '2014-01-14 20:10';
 	        return storage.parseDependencies({
-	          expire: '2014-01-14 20:10'
+	          expire: time
 	        }, function(dependencies) {
 	          expect(dependencies).to.be.eql({
-	            expire: 1389726600000
+	            expire: moment(time, Cache.TIME_FORMAT).valueOf()
 	          });
 	          return done();
 	        });
@@ -7451,7 +7456,7 @@
 
 	/** code **/
 	(function() {
-	  var Cache, Storage, moment, storage;
+	  var Cache, Storage, cache, moment, storage;
 	
 	  Cache = require('cache-storage');
 	
@@ -7459,11 +7464,14 @@
 	
 	  moment = require('moment');
 	
+	  cache = null;
+	
 	  storage = null;
 	
 	  describe('SyncStorage', function() {
 	    beforeEach(function() {
-	      return storage = (new Cache(new Storage)).storage;
+	      storage = new Storage;
+	      return cache = new Cache(storage);
 	    });
 	    describe('#verify()', function() {
 	      it('should just return true', function() {
@@ -7521,14 +7529,16 @@
 	        return expect(storage.parseDependencies({
 	          items: ['first', 'second']
 	        })).to.be.eql({
-	          items: [97440432, -906279820]
+	          items: [cache.generateKey('first'), cache.generateKey('second')]
 	        });
 	      });
 	      it('should add date from string into dependencies', function() {
+	        var time;
+	        time = '2014-01-14 20:10';
 	        return expect(storage.parseDependencies({
-	          expire: '2014-01-14 20:10'
+	          expire: time
 	        })).to.be.eql({
-	          expire: 1389726600000
+	          expire: moment(time, Cache.TIME_FORMAT).valueOf()
 	        });
 	      });
 	      return it('should add file into dependencies', function() {
@@ -7794,7 +7804,7 @@
 , 'async': function(exports, module) { module.exports = window.require('async/lib/async.js'); }
 
 });
-require.__setStats({"/lib/Storage/Sync/BrowserLocalStorage.js":{"atime":1389743491000,"mtime":1389743489000,"ctime":1389743489000},"/lib/Storage/Sync/Storage.js":{"atime":1389743491000,"mtime":1389743489000,"ctime":1389743489000},"/lib/Storage/Storage.js":{"atime":1389743491000,"mtime":1389743489000,"ctime":1389743489000},"moment/moment.js":{"atime":1389726647000,"mtime":1387832828000,"ctime":1389389769000},"/lib/Cache.js":{"atime":1389743491000,"mtime":1389743489000,"ctime":1389743489000},"fs-mock/lib/fs.js":{"atime":1389710368000,"mtime":1389273046000,"ctime":1389391420000},"fs-mock/lib/Stats.js":{"atime":1389710369000,"mtime":1389269301000,"ctime":1389391420000},"fs-mock/lib/Errors.js":{"atime":1389710369000,"mtime":1389269301000,"ctime":1389391420000},"fs-mock/lib/FSWatcher.js":{"atime":1389710369000,"mtime":1389269301000,"ctime":1389391420000},"escape-regexp/index.js":{"atime":1389710369000,"mtime":1345153109000,"ctime":1389391421000},"/lib/Storage/Async/DevNullStorage.js":{"atime":1389743491000,"mtime":1389743489000,"ctime":1389743489000},"/lib/Storage/Async/Storage.js":{"atime":1389743491000,"mtime":1389743489000,"ctime":1389743489000},"async/lib/async.js":{"atime":1389710368000,"mtime":1369727354000,"ctime":1389710356000},"/lib/Storage/Sync/DevNullStorage.js":{"atime":1389743491000,"mtime":1389743489000,"ctime":1389743489000},"/lib/Storage/Async/FileStorage.js":{"atime":1389743491000,"mtime":1389743489000,"ctime":1389743489000},"/lib/Storage/Sync/FileStorage.js":{"atime":1389743491000,"mtime":1389743489000,"ctime":1389743489000},"/lib/Storage/Async/MemoryStorage.js":{"atime":1389743491000,"mtime":1389743489000,"ctime":1389743489000},"/lib/Storage/Sync/MemoryStorage.js":{"atime":1389743491000,"mtime":1389743489000,"ctime":1389743489000},"/Storage/BrowserLocalStorage.js":{"atime":1389743491000,"mtime":1389743489000,"ctime":1389743489000},"/Storage/BrowserLocalSyncStorage.js":{"atime":1389743491000,"mtime":1389743489000,"ctime":1389743489000},"/Storage/DevNullAsyncStorage.js":{"atime":1389743491000,"mtime":1389743489000,"ctime":1389743489000},"/Storage/DevNullStorage.js":{"atime":1389743491000,"mtime":1389743489000,"ctime":1389743489000},"/Storage/DevNullSyncStorage.js":{"atime":1389743491000,"mtime":1389743489000,"ctime":1389743489000},"/Storage/FileAsyncStorage.js":{"atime":1389743491000,"mtime":1389743489000,"ctime":1389743489000},"/Storage/FileStorage.js":{"atime":1389743491000,"mtime":1389743489000,"ctime":1389743489000},"/Storage/FileSyncStorage.js":{"atime":1389743491000,"mtime":1389743489000,"ctime":1389743489000},"/Storage/MemoryAsyncStorage.js":{"atime":1389743491000,"mtime":1389743489000,"ctime":1389743489000},"/Storage/MemoryStorage.js":{"atime":1389743491000,"mtime":1389743489000,"ctime":1389743489000},"/Storage/MemorySyncStorage.js":{"atime":1389743491000,"mtime":1389743489000,"ctime":1389743489000},"/test/browser/tests/Cache.coffee":{"atime":1389710370000,"mtime":1383999743000,"ctime":1389463648000},"/test/browser/tests/Storage/Async/DevNullStorage.coffee":{"atime":1389743491000,"mtime":1389743489000,"ctime":1389743489000},"/test/browser/tests/Storage/Async/MemoryStorage.coffee":{"atime":1389743491000,"mtime":1389743489000,"ctime":1389743489000},"/test/browser/tests/Storage/Async/Storage.coffee":{"atime":1389743491000,"mtime":1389743489000,"ctime":1389743489000},"/test/browser/tests/Storage/Sync/BrowserLocalStorage.coffee":{"atime":1389743491000,"mtime":1389743489000,"ctime":1389743489000},"/test/browser/tests/Storage/Sync/DevNullStorage.coffee":{"atime":1389743491000,"mtime":1389743489000,"ctime":1389743489000},"/test/browser/tests/Storage/Sync/FileStorage.coffee":{"atime":1389743491000,"mtime":1389743489000,"ctime":1389743489000},"/test/browser/tests/Storage/Sync/MemoryStorage.coffee":{"atime":1389743491000,"mtime":1389743489000,"ctime":1389743489000},"/test/browser/tests/Storage/Sync/Storage.coffee":{"atime":1389743491000,"mtime":1389743489000,"ctime":1389743489000},"/package.json":{"atime":1389743491000,"mtime":1389743489000,"ctime":1389743489000},"moment/package.json":{"atime":1389710353000,"mtime":1389389769000,"ctime":1389389769000},"async/package.json":{"atime":1389710368000,"mtime":1389710356000,"ctime":1389710356000}});
+require.__setStats({"/lib/Storage/Sync/BrowserLocalStorage.js":{"atime":1389743491000,"mtime":1389743489000,"ctime":1389743489000},"/lib/Storage/Sync/Storage.js":{"atime":1389743491000,"mtime":1389743489000,"ctime":1389743489000},"/lib/Storage/Storage.js":{"atime":1389743491000,"mtime":1389743489000,"ctime":1389743489000},"moment/moment.js":{"atime":1389726647000,"mtime":1387832828000,"ctime":1389389769000},"/lib/Cache.js":{"atime":1389743491000,"mtime":1389743489000,"ctime":1389743489000},"fs-mock/lib/fs.js":{"atime":1389710368000,"mtime":1389273046000,"ctime":1389391420000},"fs-mock/lib/Stats.js":{"atime":1389710369000,"mtime":1389269301000,"ctime":1389391420000},"fs-mock/lib/Errors.js":{"atime":1389710369000,"mtime":1389269301000,"ctime":1389391420000},"fs-mock/lib/FSWatcher.js":{"atime":1389710369000,"mtime":1389269301000,"ctime":1389391420000},"escape-regexp/index.js":{"atime":1389710369000,"mtime":1345153109000,"ctime":1389391421000},"/lib/Storage/Async/DevNullStorage.js":{"atime":1389743491000,"mtime":1389743489000,"ctime":1389743489000},"/lib/Storage/Async/Storage.js":{"atime":1389743491000,"mtime":1389743489000,"ctime":1389743489000},"async/lib/async.js":{"atime":1389710368000,"mtime":1369727354000,"ctime":1389710356000},"/lib/Storage/Sync/DevNullStorage.js":{"atime":1389743491000,"mtime":1389743489000,"ctime":1389743489000},"/lib/Storage/Async/FileStorage.js":{"atime":1389743491000,"mtime":1389743489000,"ctime":1389743489000},"/lib/Storage/Sync/FileStorage.js":{"atime":1389743491000,"mtime":1389743489000,"ctime":1389743489000},"/lib/Storage/Async/MemoryStorage.js":{"atime":1389743491000,"mtime":1389743489000,"ctime":1389743489000},"/lib/Storage/Sync/MemoryStorage.js":{"atime":1389743491000,"mtime":1389743489000,"ctime":1389743489000},"/Storage/BrowserLocalStorage.js":{"atime":1389743491000,"mtime":1389743489000,"ctime":1389743489000},"/Storage/BrowserLocalSyncStorage.js":{"atime":1389743491000,"mtime":1389743489000,"ctime":1389743489000},"/Storage/DevNullAsyncStorage.js":{"atime":1389743491000,"mtime":1389743489000,"ctime":1389743489000},"/Storage/DevNullStorage.js":{"atime":1389743491000,"mtime":1389743489000,"ctime":1389743489000},"/Storage/DevNullSyncStorage.js":{"atime":1389743491000,"mtime":1389743489000,"ctime":1389743489000},"/Storage/FileAsyncStorage.js":{"atime":1389743491000,"mtime":1389743489000,"ctime":1389743489000},"/Storage/FileStorage.js":{"atime":1389743491000,"mtime":1389743489000,"ctime":1389743489000},"/Storage/FileSyncStorage.js":{"atime":1389743491000,"mtime":1389743489000,"ctime":1389743489000},"/Storage/MemoryAsyncStorage.js":{"atime":1389743491000,"mtime":1389743489000,"ctime":1389743489000},"/Storage/MemoryStorage.js":{"atime":1389743491000,"mtime":1389743489000,"ctime":1389743489000},"/Storage/MemorySyncStorage.js":{"atime":1389743491000,"mtime":1389743489000,"ctime":1389743489000},"/test/browser/tests/Cache.coffee":{"atime":1389710370000,"mtime":1383999743000,"ctime":1389463648000},"/test/browser/tests/Storage/Async/DevNullStorage.coffee":{"atime":1389743491000,"mtime":1389743489000,"ctime":1389743489000},"/test/browser/tests/Storage/Async/MemoryStorage.coffee":{"atime":1389743491000,"mtime":1389743489000,"ctime":1389743489000},"/test/browser/tests/Storage/Async/Storage.coffee":{"atime":1389785187000,"mtime":1389785112000,"ctime":1389785112000},"/test/browser/tests/Storage/Sync/BrowserLocalStorage.coffee":{"atime":1389743491000,"mtime":1389743489000,"ctime":1389743489000},"/test/browser/tests/Storage/Sync/DevNullStorage.coffee":{"atime":1389743491000,"mtime":1389743489000,"ctime":1389743489000},"/test/browser/tests/Storage/Sync/FileStorage.coffee":{"atime":1389743491000,"mtime":1389743489000,"ctime":1389743489000},"/test/browser/tests/Storage/Sync/MemoryStorage.coffee":{"atime":1389743491000,"mtime":1389743489000,"ctime":1389743489000},"/test/browser/tests/Storage/Sync/Storage.coffee":{"atime":1389785187000,"mtime":1389785180000,"ctime":1389785180000},"/package.json":{"atime":1389743491000,"mtime":1389743489000,"ctime":1389743489000},"moment/package.json":{"atime":1389710353000,"mtime":1389389769000,"ctime":1389389769000},"async/package.json":{"atime":1389710368000,"mtime":1389710356000,"ctime":1389710356000}});
 require.version = '5.5.1';
 
 /** run section **/
