@@ -1,12 +1,20 @@
-[![NPM version](https://badge.fury.io/js/cache-storage.png)](http://badge.fury.io/js/cache-storage)
-[![Dependency Status](https://gemnasium.com/sakren/node-cache-storage.png)](https://gemnasium.com/sakren/node-cache-storage)
-[![Build Status](https://travis-ci.org/sakren/node-cache-storage.png?branch=master)](https://travis-ci.org/sakren/node-cache-storage)
+[![NPM version](https://img.shields.io/npm/v/cache-storage.svg?style=flat-square)](http://badge.fury.io/js/cache-storage)
+[![Dependency Status](https://img.shields.io/gemnasium/Carrooi/Node-CacheStorage.svg?style=flat-square)](https://gemnasium.com/Carrooi/Node-CacheStorage)
+[![Build Status](https://img.shields.io/travis/Carrooi/Node-CacheStorage.svg?style=flat-square)](https://travis-ci.org/Carrooi/Node-CacheStorage)
 
 # cache-storage
 
 Advanced cache storage inspired by cache in [Nette framework](http://doc.nette.org/en/caching).
 
 Can be also used in browser for example with [simq](https://npmjs.org/package/simq).
+
+## Help
+
+Unfortunately I don't have any more time to maintain this repository :-( 
+
+Don't you want to save me and this project by taking over it?
+
+![sad cat](https://raw.githubusercontent.com/sakren/sakren.github.io/master/images/sad-kitten.jpg)
 
 ## Installing
 
@@ -210,6 +218,10 @@ $ npm test
 ```
 
 ## Changelog
+
+* 2.0.1
+	+ Move under Carrooi organization
+	+ Abandon package
 
 * 2.0.0
 	+ Support for asynchronous storages
